@@ -151,6 +151,7 @@ escriptize: couch
 .PHONY: check
 # target: check - Test everything
 check: all python-black
+	@$(MAKE) exunit
 	@$(MAKE) eunit
 	@$(MAKE) mango-test
 	@$(MAKE) elixir-suite
