@@ -20,10 +20,10 @@
 
 -export([md5_hash/1, md5_hash_final/1, md5_hash_init/0, md5_hash_update/2]).
 
-% The ERLANG_MD5 define is set at compile time by --erlang-md5 configure flag
-% This is deprecated. Instead, FIPS mode is now detected automatically and the
-% build-in Erlang function will be used when FIPS mode is enabled.
-%
+%% FIPS (
+%  The ERLANG_MD5 define is set at compile time by --erlang-md5 configure flag
+%  This is deprecated. Instead, FIPS mode is now detected automatically and the
+%  build-in Erlang function will be used when FIPS mode is enabled.)
 -ifdef(ERLANG_MD5).
 
 md5_hash(Data) ->

@@ -496,6 +496,7 @@ encoded_lengths_from_json(Props) ->
     {Len, EncodedLen, Encoding}.
 
 digest_from_json(Props) ->
+    %% FIPS-ignore (encrypt attachments)
     case couch_util:get_value(<<"digest">>, Props) of
         <<"md5-", EncodedDigest/binary>> -> base64:decode(EncodedDigest);
         _ -> <<>>
@@ -509,6 +510,7 @@ to_json(Att, OutputData, DataToFollow, ShowEncoding) ->
         {<<"content_type">>, Type},
         {<<"revpos">>, RevPos}
     ],
+    %% FIPS-ignore (encrypt attachments)
     DigestProp =
         case base64:encode(InDigest) of
             <<>> -> [];
@@ -866,6 +868,7 @@ attachment_disk_term_test_() ->
     ]}.
 
 attachment_json_term_test_() ->
+    %% FIPS-ignore (encrypt attachments)
     Props = [
         {<<"content_type">>, <<"application/json">>},
         {<<"digest">>, <<"md5-QCNtWUNXV0UzJnEjMk92YUk1JA==">>},
@@ -906,6 +909,7 @@ attachment_stub_merge_test_() ->
 %% Test generators
 
 test_non_upgrading_fields(Attachment) ->
+    %% FIPS-ignore (encrypt attachments)
     Pairs = [
         {name, "cat.gif"},
         {type, "text/very-very-plain"},

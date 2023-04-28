@@ -18,6 +18,7 @@
 -define(ADM_USER, "adm_user").
 -define(ADM_PASS, "adm_pass").
 -define(WORKING_HASHES, "sha256, sha512, sha, blake2s").
+%% FIPS-ignore (test case)
 -define(FAILING_HASHES, "md4, md5, ripemd160").
 
 hash_algorithms_test_() ->
