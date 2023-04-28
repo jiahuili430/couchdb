@@ -20,10 +20,10 @@
 
 -export([digest/1, digest_final/1, digest_init/0, digest_update/2]).
 
-% The ERLANG_MD5 define is set at compile time by --erlang-md5 configure flag
-% This is deprecated. Instead, FIPS mode is now detected automatically and the
-% build-in Erlang function will be used when FIPS mode is enabled.
-%
+%% FIPS (
+%  The ERLANG_MD5 define is set at compile time by --erlang-md5 configure flag
+%  This is deprecated. Instead, FIPS mode is now detected automatically and the
+%  build-in Erlang function will be used when FIPS mode is enabled.)
 -ifdef(ERLANG_MD5).
 
 digest(Data) ->
