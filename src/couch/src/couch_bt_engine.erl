@@ -421,7 +421,7 @@ serialize_doc(#st{} = St, #doc{} = Doc) ->
     Body = Compress(Doc#doc.body),
     Atts = Compress(Doc#doc.atts),
     SummaryBin = ?term_to_bin({Body, Atts}),
-    Digest = couch_hash:digest(SummaryBin),
+    Digest = couch_hash:md5_hash(SummaryBin),
     Data = couch_file:assemble_file_chunk(SummaryBin, Digest),
     % TODO: This is a terrible hack to get around the issues
     %       in COUCHDB-3255. We'll need to come back and figure
