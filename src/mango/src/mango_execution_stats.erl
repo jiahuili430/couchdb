@@ -95,6 +95,7 @@ maybe_add_stats(Opts, UserFun, Stats0, UserAcc) ->
     %% TODO: add rows read when we collect the stats
     %% TODO: add docs vs quorum docs
     chttpd_stats:incr_reads(Stats1#execution_stats.totalDocsExamined),
+    chttpd_stats:incr_rows(Stats1#execution_stats.totalKeysExamined),
 
     FinalAcc =
         case couch_util:get_value(execution_stats, Opts) of
