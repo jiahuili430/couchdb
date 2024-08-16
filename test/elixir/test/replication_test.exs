@@ -1308,6 +1308,10 @@ defmodule ReplicationTest do
 
       case doc["integer"] do
         N when (N >= 10 and N < 15) or is_ddoc ->
+          IO.puts "--------------------------------------------------"
+          IO.puts "+++ N: #{N} -> #{IEx.Info.info(N)}"
+          IO.puts "--------------------------------------------------"
+
           resp = Couch.get!("/#{tgt_db_name}/#{doc["_id"]}")
           atts = resp.body["_attachments"]
           assert is_map(atts)
