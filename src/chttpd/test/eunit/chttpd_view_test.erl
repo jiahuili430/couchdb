@@ -409,5 +409,7 @@ req(Method, Url, #{} = Body) ->
     req(Method, Url, jiffy:encode(Body));
 req(Method, Url, Body) ->
     Headers = [?CONTENT_JSON, ?AUTH],
+    Response = test_request:request(Method, Url, Headers, Body),
+    ?debugFmt("+++ Response: ~p~n", [Response]),
     {ok, Code, _, Res} = test_request:request(Method, Url, Headers, Body),
     {Code, jiffy:decode(Res, [return_maps])}.
