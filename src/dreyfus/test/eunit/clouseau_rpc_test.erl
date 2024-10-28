@@ -12,8 +12,6 @@
 
 -module(clouseau_rpc_test).
 
--ifdef(WITH_CLOUSEAU).
-
 -include_lib("couch/include/couch_db.hrl").
 -include_lib("couch/include/couch_eunit.hrl").
 -include_lib("stdlib/include/ms_transform.hrl").
@@ -155,7 +153,7 @@ t_analyze(_) ->
 
 t_get_root_dir(_) ->
     {ok, RootDir} = rpc:call(?NODE, clouseau_rpc, get_root_dir, []),
-    ?assertNotEqual(nomatch, binary:match(RootDir, <<"clouseau">>)).
+    ?assertNotEqual(nomatch, binary:match(RootDir, <<"ziose">>)).
 
 t_version(_) ->
     Version = rpc:call(?NODE, clouseau_rpc, version, []),
@@ -277,6 +275,7 @@ t_delete_with_docs({Tid, Db}) ->
 
 t_commit(_) ->
     {Tid, Db} = setup_with_ddoc(commit, 2),
+    wait_indexing(),
     Args = get_args(Tid),
     ?assert(is_pid(Args#arg.ref)),
     ?assertEqual(1, Args#arg.seq),
@@ -287,7 +286,7 @@ t_commit_with_docs({Tid, Db}) ->
     set_tracer(Tid, commit, 2),
     Args = get_args(Tid),
     ?assert(is_pid(Args#arg.ref)),
-    ?assert(lists:member(Args#arg.seq, [2, 3])),
+    ?assertEqual(5, Args#arg.seq),
     ?assertEqual(ok, Args#arg.commit),
     teardown(Tid, Db).
 
@@ -336,7 +335,7 @@ t_info_with_docs({Tid, Db}) ->
             <<"search_index">> =>
                 #{
                     <<"committed_seq">> => 0,
-                    <<"disk_size">> => 2456,
+                    <<"disk_size">> => 1269,
                     <<"doc_count">> => 2,
                     <<"doc_del_count">> => 0,
                     <<"pending_seq">> => 5,
@@ -348,10 +347,10 @@ t_info_with_docs({Tid, Db}) ->
     ?assert(is_pid(Args#arg.ref)),
     ?assertEqual(
         {ok, [
-            {disk_size, 1228},
-            {doc_count, 1},
+            {disk_size, 1269},
+            {doc_count, 2},
             {doc_del_count, 0},
-            {pending_seq, 2},
+            {pending_seq, 5},
             {committed_seq, 0},
             {purge_seq, 0}
         ]},
@@ -402,18 +401,18 @@ t_search_with_docs({Tid, Db}) ->
     ?assertEqual(
         {200, #{
             <<"bookmark">> =>
-                <<"g1AAAABpeJzLYWBgYMpgTmHgz8tPSTV0MDQy1zMAQsMckEQiQ1L9____szKY3Ow_MIBBIgNO1XksIAUNQOo_hqYsADX3Gfw">>,
+                <<"g2wAAAABaANkAA9ub2RlMUAxMjcuMC4wLjFsAAAAAmEAbgQA_____2poAkY_8AAAAAAAAGEBag">>,
             <<"rows">> =>
                 [
                     #{
                         <<"fields">> => #{<<"val">> => 1.0},
-                        <<"id">> => <<"3">>,
+                        <<"id">> => <<"1">>,
                         <<"order">> => [1.0, 0]
                     },
                     #{
                         <<"fields">> => #{<<"val">> => 1.0},
-                        <<"id">> => <<"1">>,
-                        <<"order">> => [1.0, 0]
+                        <<"id">> => <<"3">>,
+                        <<"order">> => [1.0, 1]
                     }
                 ],
             <<"total_rows">> => 2
@@ -443,8 +442,12 @@ t_search_with_docs({Tid, Db}) ->
     ),
     ?assertMatch(
         {ok,
-            {top_docs, 0, 1, [{hit, [1.0, 0], [{<<"_id">>, _}, {<<"val">>, 1.0}]}], undefined,
-                undefined}},
+            {top_docs, 0, 2,
+                [
+                    {hit, [1.0, 0], [{<<"_id">>, <<"1">>}, {<<"val">>, 1.0}]},
+                    {hit, [1.0, 1], [{<<"_id">>, <<"3">>}, {<<"val">>, 1.0}]}
+                ],
+                undefined, undefined}},
         Args#arg.search
     ),
     teardown(Tid, Db).
@@ -477,18 +480,18 @@ t_group_with_docs({Tid, Db}) ->
             <<"groups">> =>
                 [
                     #{
-                        <<"by">> => <<36, 11, 127, 64, 0, 0, 0, 0, 0, 0>>,
+                        <<"by">> => <<40, 95, 124, 0, 0, 0, 0, 0, 0>>,
                         <<"rows">> =>
                             [
                                 #{
                                     <<"fields">> => #{<<"val">> => 1.0},
-                                    <<"id">> => <<"3">>,
+                                    <<"id">> => <<"1">>,
                                     <<"order">> => [1.0, 0]
                                 },
                                 #{
                                     <<"fields">> => #{<<"val">> => 1.0},
-                                    <<"id">> => <<"1">>,
-                                    <<"order">> => [1.0, 0]
+                                    <<"id">> => <<"3">>,
+                                    <<"order">> => [1.0, 1]
                                 }
                             ],
                         <<"total_rows">> => 2
@@ -505,7 +508,7 @@ t_group_with_docs({Tid, Db}) ->
     ?assertEqual(relevance, Args1#arg.sort),
     ?assertEqual(0, Args1#arg.offset),
     ?assertEqual(10, Args1#arg.limit),
-    ?assertEqual({ok, [{<<36, 11, 127, 64, 0, 0, 0, 0, 0, 0>>, [1.0]}]}, Args1#arg.group1),
+    ?assertEqual({ok, [{<<40, 95, 124, 0, 0, 0, 0, 0, 0>>, [1.0]}]}, Args1#arg.group1),
 
     set_tracer(Tid, group, 2),
     req(get, url(Db, "_design/ddoc/_search/val_idx", "query=*%3A*&group_field=val")),
@@ -516,7 +519,7 @@ t_group_with_docs({Tid, Db}) ->
             {query, <<"*:*">>},
             {field, <<"val">>},
             {refresh, true},
-            {groups, [{<<36, 11, 127, 64, 0, 0, 0, 0, 0, 0>>, [1.0]}]},
+            {groups, [{<<40, 95, 124, 0, 0, 0, 0, 0, 0>>, [1.0]}]},
             {group_sort, relevance},
             {sort, relevance},
             {limit, 25},
@@ -530,9 +533,10 @@ t_group_with_docs({Tid, Db}) ->
         Args2#arg.args
     ),
     ?assertEqual(
-        {ok, 1, 1, [
-            {<<36, 11, 127, 64, 0, 0, 0, 0, 0, 0>>, 1, [
-                {hit, [1.0, 0], [{<<"_id">>, <<"1">>}, {<<"val">>, 1.0}]}
+        {ok, 2, 2, [
+            {<<40, 95, 124, 0, 0, 0, 0, 0, 0>>, 2, [
+                {hit, [1.0, 0], [{<<"_id">>, <<"1">>}, {<<"val">>, 1.0}]},
+                {hit, [1.0, 1], [{<<"_id">>, <<"3">>}, {<<"val">>, 1.0}]}
             ]}
         ]},
         Args2#arg.group2
@@ -867,5 +871,3 @@ req(Method, Url, Headers, #{} = Body) ->
     Code = list_to_integer(Code0),
     RespBody = iolist_to_binary(RespBody0),
     {Code, jiffy:decode(RespBody, [return_maps])}.
-
--endif.
