@@ -123,8 +123,11 @@ should_emit_error_details(_) ->
         }
     ">>,
     Proc = couch_query_servers:get_os_process(<<"javascript">>),
+    ?debugFmt("+++++++@~B Proc:~p~n", [?LINE, Proc]),
     true = prompt(Proc, [<<"add_fun">>, Src]),
+    ?debugFmt("+++++++@~B prompt true?:~p~n", [?LINE, prompt(Proc, [<<"add_fun">>, Src])]),
     Result = prompt(Proc, [<<"map_doc">>,  {[{<<"foo">>, 42}]}]),
+    ?debugFmt("+++++++@~B Result:~p~n", [?LINE, Result]),
     ?assertMatch([[[<<"err">>, {[_ | _]}]]], Result),
     [[[<<"err">>, {ErrProps}]]] = Result,
     ?assertEqual(<<"ReferenceError">>, couch_util:get_value(<<"error">>, ErrProps)),
