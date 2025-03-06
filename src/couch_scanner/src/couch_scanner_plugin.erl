@@ -179,9 +179,11 @@
 }).
 
 spawn_link(Id) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     proc_lib:spawn_link(?MODULE, run, [Id]).
 
 stop(Pid) when is_pid(Pid) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     unlink(Pid),
     Ref = erlang:monitor(process, Pid),
     Pid ! stop,
@@ -198,6 +200,7 @@ stop(Pid) when is_pid(Pid) ->
 % Main run function
 
 run(Id) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     RLimiter = couch_scanner_rate_limiter:get(),
     {Mod, Callbacks} = plugin_mod(Id),
     St = #st{
@@ -214,6 +217,7 @@ run(Id) ->
 % Private functions
 
 init_config(#st{mod = Mod} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St#st{
         skip_dbs = config_match_patterns(Mod, "skip_dbs"),
         skip_ddocs = config_match_patterns(Mod, "skip_ddocs"),
@@ -221,6 +225,7 @@ init_config(#st{mod = Mod} = St) ->
     }.
 
 init_from_checkpoint(#st{} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #st{id = Id, mod = Mod, callbacks = Cbks} = St,
     case couch_scanner_checkpoint:read(Id) of
         #{
@@ -273,6 +278,7 @@ init_from_checkpoint(#st{} = St) ->
     end.
 
 scan_dbs(#st{cursor = Cursor} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     ShardsDbName = mem3_sync:shards_db(),
     ioq:set_io_priority({system, ShardsDbName}),
     {ok, Db} = mem3_util:ensure_exists(ShardsDbName),
@@ -286,6 +292,7 @@ scan_dbs(#st{cursor = Cursor} = St) ->
     end.
 
 scan_dbs_fold(#full_doc_info{} = FDI, #st{shards_db = Db} = Acc) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     Acc1 = Acc#st{cursor = FDI#full_doc_info.id},
     Acc2 = maybe_checkpoint(Acc1),
     case couch_db:open_doc(Db, FDI, [ejson_body]) of
@@ -301,8 +308,10 @@ scan_dbs_fold(#full_doc_info{} = FDI, #st{shards_db = Db} = Acc) ->
     end.
 
 scan_db([], #st{} = St) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {ok, St};
 scan_db([_ | _] = Shards, #st{} = St) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #st{dbname = DbName, callbacks = Cbks, pst = PSt, skip_dbs = Skip} = St,
     #{db := DbCbk} = Cbks,
     case match_skip_pat(DbName, Skip) of
@@ -326,18 +335,24 @@ scan_db([_ | _] = Shards, #st{} = St) ->
     end.
 
 scan_ddocs_fold({meta, _}, #st{} = Acc) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {ok, Acc};
 scan_ddocs_fold({row, RowProps}, #st{} = Acc) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     DDoc = couch_util:get_value(doc, RowProps),
     scan_ddoc(ejson_to_doc(DDoc), Acc);
 scan_ddocs_fold(complete, #st{} = Acc) ->
+    couch_log:error("~n ====================3 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {ok, Acc};
 scan_ddocs_fold({error, Error}, _Acc) ->
+    couch_log:error("~n ====================4 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     exit({shutdown, {scan_ddocs_fold, Error}}).
 
 scan_shards([], #st{} = St) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St;
 scan_shards([#shard{} = Shard | Rest], #st{} = St) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St1 = scan_docs(St, Shard),
     scan_shards(Rest, St1).
 
@@ -357,6 +372,7 @@ scan_ddoc(#doc{id = DDocId} = DDoc, #st{} = St) ->
     end.
 
 scan_docs(#st{} = St, #shard{name = ShardDbName}) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St1 = rate_limit(St, shard),
     case couch_db:open_int(ShardDbName, [?ADMIN_CTX]) of
         {ok, Db} ->
@@ -375,6 +391,7 @@ scan_docs(#st{} = St, #shard{name = ShardDbName}) ->
     end.
 
 scan_docs_fold(#full_doc_info{id = Id} = FDI, #st{} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #st{db = Db, callbacks = Cbks, pst = PSt, skip_docs = Skip} = St,
     #{doc_id := DocIdCbk} = Cbks,
     case match_skip_pat(Id, Skip) of
@@ -391,11 +408,14 @@ scan_docs_fold(#full_doc_info{id = Id} = FDI, #st{} = St) ->
     end.
 
 scan_doc(#full_doc_info{} = FDI, #st{} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n++++++ FDI: ~p~n", [FDI]),
     #st{db = Db, callbacks = Cbks, pst = PSt} = St,
     St1 = rate_limit(St, doc),
     case couch_db:open_doc(Db, FDI, [ejson_body]) of
         {ok, #doc{} = Doc} ->
             #{doc := DocCbk} = Cbks,
+            io:format("~n++++++ DocCbk: ~p~n", [DocCbk]),
             {Go, PSt1} = DocCbk(PSt, Db, Doc),
             case Go of
                 ok -> {ok, St1#st{pst = PSt1}};
@@ -406,6 +426,7 @@ scan_doc(#full_doc_info{} = FDI, #st{} = St) ->
     end.
 
 maybe_checkpoint(#st{checkpoint_sec = LastCheckpointTSec} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     receive
         stop -> exit({shutdown, stop})
     after 0 -> ok
@@ -417,6 +438,7 @@ maybe_checkpoint(#st{checkpoint_sec = LastCheckpointTSec} = St) ->
     end.
 
 rate_limit(#st{rlimiter = RLimiter} = St, Type) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {WaitMSec, RLimiter1} = couch_scanner_rate_limiter:update(RLimiter, Type),
     receive
         stop -> exit({shutdown, stop})
@@ -424,6 +446,7 @@ rate_limit(#st{rlimiter = RLimiter} = St, Type) ->
     end.
 
 checkpoint(#st{} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #st{
         id = Id,
         callbacks = Cbks,
@@ -444,6 +467,7 @@ checkpoint(#st{} = St) ->
     St#st{checkpoint_sec = tsec()}.
 
 finalize(#st{} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #st{
         id = Id,
         mod = Mod,
@@ -468,11 +492,14 @@ finalize(#st{} = St) ->
     end.
 
 exit_resched(reset) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     % Reset the checkpoint and restart with a fresh config
     exit({shutdown, reset});
 exit_resched(infinity) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     exit({shutdown, {reschedule, infinity}});
 exit_resched(TimeSec) when is_integer(TimeSec) ->
+    couch_log:error("~n ====================3 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     exit({shutdown, {reschedule, TimeSec}}).
 
 % Call plugin module API functions
@@ -480,6 +507,7 @@ exit_resched(TimeSec) when is_integer(TimeSec) ->
 start_callback(Mod, Cbks, Now, ScanId, LastStartSec, #{} = EJson) when
     is_atom(Mod), is_binary(ScanId), is_integer(LastStartSec)
 ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     case schedule_time(Mod, LastStartSec, Now) of
         infinity ->
             exit_resched(infinity);
@@ -495,6 +523,7 @@ start_callback(Mod, Cbks, Now, ScanId, LastStartSec, #{} = EJson) when
     end.
 
 resume_callback(#{} = Cbks, SId, #{} = EJsonPSt) when is_binary(SId) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #{resume := ResumeCbk} = Cbks,
     case ResumeCbk(SId, EJsonPSt) of
         {ok, PSt} -> PSt;
@@ -503,16 +532,19 @@ resume_callback(#{} = Cbks, SId, #{} = EJsonPSt) when is_binary(SId) ->
     end.
 
 db_opened_callback(#st{pst = PSt, callbacks = Cbks, db = Db} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #{db_opened := DbOpenedCbk} = Cbks,
     {ok, PSt1} = DbOpenedCbk(PSt, Db),
     St#st{pst = PSt1}.
 
 db_closing_callback(#st{pst = PSt, callbacks = Cbks, db = Db} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #{db_closing := DbClosingCbk} = Cbks,
     {ok, PSt1} = DbClosingCbk(PSt, Db),
     St#st{pst = PSt1}.
 
 shards_callback(#st{pst = PSt, callbacks = Cbks} = St, Shards) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #{shards := ShardsCbk} = Cbks,
     {Shards1, PSt1} = ShardsCbk(PSt, Shards),
     {Shards1, St#st{pst = PSt1}}.
@@ -520,6 +552,7 @@ shards_callback(#st{pst = PSt, callbacks = Cbks} = St, Shards) ->
 start_checkpoint(Id, #{} = Cbks, StartSec, ScanId, Cur, PSt) when
     is_binary(Id), is_binary(ScanId), is_integer(StartSec)
 ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     EJsonPSt = checkpoint_callback(Cbks, PSt),
     EJson = #{
         <<"cursor">> => Cur,
@@ -531,6 +564,7 @@ start_checkpoint(Id, #{} = Cbks, StartSec, ScanId, Cur, PSt) when
     ok = couch_scanner_checkpoint:write(Id, EJson).
 
 checkpoint_callback(#{} = Cbks, PSt) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #{checkpoint := CheckpointCbk} = Cbks,
     case CheckpointCbk(PSt) of
         {ok, #{} = EJsonPSt} -> couch_scanner_util:ejson_map(EJsonPSt);
@@ -603,9 +637,11 @@ is_exported(Mod, F, A) ->
 % Shard selection
 
 shards(<<?DESIGN_DOC_PREFIX, _/binary>>, {Props}) when is_list(Props) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     % In case the shard map has a design document in it
     [];
 shards(DbName, {Props = [_ | _]}) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     Shards = lists:sort(mem3_util:build_shards(DbName, Props)),
     Fun = fun({R, SList}) ->
         case mem3_util:rotate_list({DbName, R}, SList) of
@@ -618,6 +654,7 @@ shards(DbName, {Props = [_ | _]}) ->
     lists:filtermap(Fun, shards_by_range(lists:sort(Shards))).
 
 shards_by_range(Shards) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     Fun = fun(#shard{range = R} = S, Acc) -> orddict:append(R, S, Acc) end,
     Dict = lists:foldl(Fun, orddict:new(), Shards),
     orddict:to_list(Dict).
