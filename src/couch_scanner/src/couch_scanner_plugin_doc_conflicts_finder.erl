@@ -16,8 +16,8 @@
 -export([
   start/2,
   resume/2,
-%%  complete/1,
-%%  checkpoint/1,
+  complete/1,
+  checkpoint/1,
   db/2,
   doc_id/3
 %%  ddoc/3
@@ -28,28 +28,27 @@
 -record(st, {
   sid,
   opts = #{},
-%%  dbname,
-%%  report = #{},
-
-  conflicts_cnt,
-  deleted_conflicts_cnt,
-
-  run_on_first_node = true
+  dbname,
+  report = #{},
+  run_on_first_node = true,
+  doc_report = false
 }).
 
 -define(CONFLICTS, <<"conflicts">>).
+-define(DELETED_CONFLICTS, <<"deleted_conflicts">>).
 
 -define(OPTS, #{
-  ?CONFLICTS => true
+  ?CONFLICTS => true,
+  ?DELETED_CONFLICTS => true
 }).
 
 % Behavior callbacks
 
 start(SId, #{}) ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n SId:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, SId]),
+  io:format("~n++++++ start SId: ~p~n", [SId]),
   St = init_config(#st{sid = SId}),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n St:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, St]),
+  io:format("~n++++++ start St: ~p~n", [St]),
   case should_run(St) of
     true ->
       ?INFO("Starting.", [], #{sid => SId}),
@@ -61,11 +60,10 @@ start(SId, #{}) ->
 
 resume(SId, #{<<"opts">> := OldOpts}) ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n SId:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, SId]),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n OldOpts:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, OldOpts]),
+  io:format("~n++++++ resume SId: ~p~n", [SId]),
+  io:format("~n++++++ resume OldOpts: ~p~n", [OldOpts]),
   St = init_config(#st{sid = SId}),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n St:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, St]),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n should_run(St):~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, should_run(St)]),
+  io:format("~n++++++ resume St: ~p~n", [St]),
   case {OldOpts == St#st.opts, should_run(St)} of
     {true, true} ->
       ?INFO("Resuming.", [], #{sid => SId}),
@@ -78,24 +76,30 @@ resume(SId, #{<<"opts">> := OldOpts}) ->
       skip
   end.
 
-%%complete(#st{sid = SId, dbname = DbName, report = Report} = St) ->
-%%  report_per_db(St, DbName, Report),
-%%  ?INFO("Completed", [], #{sid => SId}),
-%%  {ok, #{}}.
+complete(#st{sid = SId, dbname = DbName, report = Report} = St) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  io:format("~n++++++ complete SId: ~p~n", [SId]),
+  io:format("~n++++++ complete DbName: ~p~n", [DbName]),
+  io:format("~n++++++ complete Report: ~p~n", [Report]),
+  io:format("~n++++++ complete St: ~p~n", [St]),
+  report_per_db(St, DbName, Report),
+  ?INFO("Completed", [], #{sid => SId}),
+  {ok, #{}}.
 
-%%checkpoint(#st{sid = SId, opts = Opts}) ->
-%%  case Opts == opts() of
-%%    true ->
-%%      {ok, #{<<"opts">> => Opts}};
-%%    false ->
-%%      ?INFO("Resetting. Config changed.", [], #{sid => SId}),
-%%      reset
-%%  end.
+checkpoint(#st{sid = SId, opts = Opts}) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  case Opts == opts() of
+    true ->
+      {ok, #{<<"opts">> => Opts}};
+    false ->
+      ?INFO("Resetting. Config changed.", [], #{sid => SId}),
+      reset
+  end.
 
 db(#st{} = St, DbName) ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n St:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, St]),
-  couch_log:error("~n++++++~n ~p:~p@~B ~n DbName:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, DbName]),
+  io:format("~n++++++ db St: ~p~n", [St]),
+  io:format("~n++++++ db DbName: ~p~n", [DbName]),
   case St#st.run_on_first_node of
     true ->
       {ok, St};
@@ -113,20 +117,14 @@ doc_id(#st{} = St, <<?DESIGN_DOC_PREFIX, _/binary>>, _Db) ->
   {skip, St};
 doc_id(#st{} = St, DocId, Db) ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
-  io:format("~n++++++ docs: {ok, St} ~n", []),
-  io:format("~n++++++ St: ~p~n", [St]),
-  io:format("~n++++++ DocId: ~p~n", [DocId]),
+  io:format("~n++++++ doc_id docs: {ok, St} ~n", []),
+  io:format("~n++++++ doc_id St: ~p~n", [St]),
+  io:format("~n++++++ doc_id DocId: ~p~n", [DocId]),
   {ok, #doc_info{revs = Revs}} = couch_db:get_doc_info(Db, DocId),
-  io:format("~n++++++ Revs: ~p~n", [Revs]),
-  {DeletedConflicts, Conflicts} = lists:partition(fun(R) -> R#rev_info.deleted end, Revs),
-  io:format("~n++++++ Conflicts: ~p~n", [Conflicts]),
-  io:format("~n++++++ DeletedConflicts: ~p~n", [DeletedConflicts]),
-
-%%  conflicts_cnt,
-%%  deleted_conflicts_cnt,
-%%  DeletedConflictsCnt = length(DeletedConflicts),
-%%  ConflictsCnt = length(Conflicts) - 1,
-
+  io:format("~n++++++ doc_id Revs: ~p~n", [Revs]),
+  io:format("~n++++++ doc_id is_list(Revs): ~p~n", [is_list(Revs)]),
+  io:format("~n++++++ doc_id length(Revs): ~p~n", [length(Revs)]),
+  report(St, Db, DocId, Revs).
 
 
 %%  Conflicts:
@@ -134,8 +132,7 @@ doc_id(#st{} = St, DocId, Db) ->
 %%  DeletedConflicts:
 %%  [{<<"d1">>,1}]
 
-
-  {ok, St}.
+%%{ok, St}.
 
 %%doc_id(#st{} = St, <<?DESIGN_DOC_PREFIX, _/binary>>, _Db) ->
 %%  {skip, St};
@@ -172,43 +169,53 @@ should_run(#st{run_on_first_node = true}) ->
 should_run(#st{run_on_first_node = false}) ->
   true.
 
-%%check_ddoc(#st{opts = Opts} = St, DbName, #doc{} = DDoc0) ->
-%%  #doc{id = DDocId, body = Body} = DDoc0,
-%%  DDoc = couch_scanner_util:ejson_map(Body),
-%%  {_Opts, Report} = maps:fold(fun check/3, {Opts, #{}}, DDoc),
-%%  report(St, DbName, DDocId, Report).
-%%
-%%check(?UPDATES, #{} = Obj, {#{?UPDATES := true} = Opts, Rep}) ->
-%%  {Opts, bump(?UPDATES, map_size(Obj), Rep)};
-%%check(?REWRITES, <<_/binary>>, {#{?REWRITES := true} = Opts, Rep}) ->
-%%  {Opts, bump(?REWRITES, 1, Rep)};
-%%check(?REWRITES, Arr, {#{?REWRITES := true} = Opts, Rep}) when is_list(Arr) ->
-%%  {Opts, bump(?REWRITES, length(Arr), Rep)};
-%%check(?SHOWS, #{} = Obj, {#{?SHOWS := true} = Opts, Rep}) ->
-%%  {Opts, bump(?SHOWS, map_size(Obj), Rep)};
-%%check(?LISTS, #{} = Obj, {#{?LISTS := true} = Opts, Rep}) ->
-%%  {Opts, bump(?LISTS, map_size(Obj), Rep)};
-%%check(?FILTERS, #{} = Obj, {#{?FILTERS := true} = Opts, Rep}) ->
-%%  {Opts, bump(?FILTERS, map_size(Obj), Rep)};
-%%check(?VDU, <<_/binary>>, {#{?VDU := true} = Opts, Rep}) ->
-%%  {Opts, bump(?VDU, 1, Rep)};
-%%check(?VIEWS, #{} = Views, {#{?REDUCE := true} = Opts, Rep}) ->
-%%  {_, Rep1} = maps:fold(fun check_view/3, {Opts, Rep}, Views),
-%%  {Opts, Rep1};
-%%check(<<_/binary>>, _, {#{} = Opts, #{} = Rep}) ->
-%%  {Opts, Rep}.
-%%
-%%check_view(_Name, #{?REDUCE := <<"_", _/binary>>}, {#{} = Opts, #{} = Rep}) ->
-%%  % Built-in reducers
-%%  {Opts, Rep};
-%%check_view(_Name, #{?REDUCE := <<_/binary>>}, {#{} = Opts, #{} = Rep}) ->
-%%  {Opts, bump(?REDUCE, 1, Rep)};
-%%check_view(_Name, _, {#{} = Opts, #{} = Rep}) ->
-%%  {Opts, Rep}.
-%%
-%%bump(Field, N, #{} = Rep) ->
-%%  maps:update_with(Field, fun(V) -> V + N end, N, Rep).
-%%
+report(#st{} = St, _, _, Revs) when length(Revs) =< 1 ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  io:format("~n++++++ report Revs: ~p~n", [Revs]),
+  io:format("~n++++++ report length(Revs): ~p~n", [length(Revs)]),
+  {ok, St};
+report(#st{opts = Opts} = St, Db, DocId, Revs) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  io:format("~n++++++ report Opts: ~p~n", [Opts]),
+  io:format("~n++++++ report Db: ~p~n", [Db]),
+  io:format("~n++++++ report DocId: ~p~n", [DocId]),
+  io:format("~n++++++ report Revs: ~p~n", [Revs]),
+
+  {DeletedConflicts, Conflicts} = lists:partition(fun(R) ->
+    R#rev_info.deleted end, Revs),
+  io:format("~n++++++ report Conflicts: ~p~n", [Conflicts]),
+  io:format("~n++++++ report DeletedConflicts: ~p~n", [DeletedConflicts]),
+
+  ConflictsCnt = length(Conflicts) - 1,
+  DeletedConflictsCnt = length(DeletedConflicts),
+  io:format("~n++++++ report ConflictsCnt: ~p~n", [ConflictsCnt]),
+  io:format("~n++++++ report DeletedConflictsCnt: ~p~n", [DeletedConflictsCnt]),
+
+  ConflictsReport =
+    case maps:get(?CONFLICTS, Opts) of
+      true -> #{?CONFLICTS => ConflictsCnt};
+      false -> #{}
+    end,
+  DeletedConflictsReport =
+    case maps:get(?DELETED_CONFLICTS, Opts) of
+      true -> #{?DELETED_CONFLICTS => DeletedConflictsCnt};
+      false -> #{}
+    end,
+  Report = maps:merge(ConflictsReport, DeletedConflictsReport),
+  io:format("~n++++++ report ConflictsReport: ~p~n", [ConflictsReport]),
+  io:format("~n++++++ report DeletedConflictsReport: ~p~n", [DeletedConflictsReport]),
+  io:format("~n++++++ report Report: ~p~n", [Report]),
+
+
+
+%%  report_per_doc(#st{} = St, DbName, DDocId, Report),
+
+
+  #st{report = Total, dbname = PrevDbName} = St,
+  io:format("~n++++++ report Total: ~p~n", [Total]),
+  io:format("~n++++++ report PrevDbName: ~p~n", [PrevDbName]),
+  {ok, St}.
+
 %%report(#st{} = St, _, _, #{} = Report) when map_size(Report) == 0 ->
 %%  St;
 %%report(#st{} = St, DbName, DDocId, #{} = Report) ->
@@ -224,7 +231,33 @@ should_run(#st{run_on_first_node = false}) ->
 %%      % Keep accumulating per-db stats
 %%      St#st{report = merge_report(Total, Report), dbname = DbName}
 %%  end.
-%%
+
+report_per_db(#st{sid = SId}, DbName, #{} = Report) when
+  map_size(Report) > 0, is_binary(DbName)
+  ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  {Fmt, Args} = report_fmt(Report),
+  Meta = #{sid => SId, db => DbName},
+  ?WARN(Fmt, Args, Meta);
+report_per_db(#st{}, _, _) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  ok.
+
+report_fmt(Report) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  io:format("~n++++++ Report: ~p~n", [Report]),
+  Sorted = lists:sort(maps:to_list(Report)),
+  io:format("~n++++++ Sorted: ~p~n", [Sorted]),
+  FmtArgs = [{"~s:~p ", [K, V]} || {K, V} <- Sorted],
+  io:format("~n++++++ FmtArgs: ~p~n", [FmtArgs]),
+  {Fmt1, Args1} = lists:unzip(FmtArgs),
+  io:format("~n++++++ {Fmt1, Args1}: ~p~n", [{Fmt1, Args1}]),
+  Fmt2 = lists:flatten(Fmt1),
+  io:format("~n++++++ Fmt2: ~p~n", [Fmt2]),
+  Args2 = lists:flatten(Args1),
+  io:format("~n++++++ Args2: ~p~n", [Args2]),
+  {Fmt2, Args2}.
+
 %%merge_report(#{} = Total, #{} = Update) ->
 %%  Fun = fun(_K, V1, V2) -> V1 + V2 end,
 %%  maps:merge_with(Fun, Total, Update).
