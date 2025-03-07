@@ -72,6 +72,7 @@
 % Behavior callbacks
 
 start(SId, #{}) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St = init_config(#st{sid = SId}),
     case should_run(St) of
         true ->
@@ -83,6 +84,7 @@ start(SId, #{}) ->
     end.
 
 resume(SId, #{<<"opts">> := OldOpts}) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St = init_config(#st{sid = SId}),
     case {OldOpts == St#st.opts, should_run(St)} of
         {true, true} ->
@@ -97,11 +99,13 @@ resume(SId, #{<<"opts">> := OldOpts}) ->
     end.
 
 complete(#st{sid = SId, dbname = DbName, report = Report} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     report_per_db(St, DbName, Report),
     ?INFO("Completed", [], #{sid => SId}),
     {ok, #{}}.
 
 checkpoint(#st{sid = SId, opts = Opts}) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     case Opts == opts() of
         true ->
             {ok, #{<<"opts">> => Opts}};
@@ -111,6 +115,7 @@ checkpoint(#st{sid = SId, opts = Opts}) ->
     end.
 
 db(#st{} = St, DbName) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     case St#st.run_on_first_node of
         true ->
             {ok, St};
@@ -123,9 +128,11 @@ db(#st{} = St, DbName) ->
     end.
 
 ddoc(#st{} = St, _DbName, #doc{id = <<"_design/_", _/binary>>}) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     % These are auto-inserted ddocs _design/_auth, etc.
     {ok, St};
 ddoc(#st{} = St, DbName, #doc{} = DDoc) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #doc{body = {Props = [_ | _]}} = DDoc,
     case couch_util:get_value(<<"language">>, Props, <<"javascript">>) of
         <<"javascript">> -> {ok, check_ddoc(St, DbName, DDoc)};
@@ -135,6 +142,7 @@ ddoc(#st{} = St, DbName, #doc{} = DDoc) ->
 % Private
 
 init_config(#st{} = St) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St#st{
         opts = opts(),
         run_on_first_node = cfg_bool("run_on_first_node", St#st.run_on_first_node),
@@ -147,46 +155,69 @@ should_run(#st{run_on_first_node = false}) ->
     true.
 
 check_ddoc(#st{opts = Opts} = St, DbName, #doc{} = DDoc0) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #doc{id = DDocId, body = Body} = DDoc0,
     DDoc = couch_scanner_util:ejson_map(Body),
+    io:format("~n++++++ BEFORE St: ~p~n", [St]),
     {_Opts, Report} = maps:fold(fun check/3, {Opts, #{}}, DDoc),
+    io:format("~n++++++ AFTER St: ~p~n", [St]),
+    couch_log:error("~n++++++~n ~p:~p@~B~n Report:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Report]),
     report(St, DbName, DDocId, Report).
 
 check(?UPDATES, #{} = Obj, {#{?UPDATES := true} = Opts, Rep}) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?UPDATES, map_size(Obj), Rep)};
 check(?REWRITES, <<_/binary>>, {#{?REWRITES := true} = Opts, Rep}) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?REWRITES, 1, Rep)};
 check(?REWRITES, Arr, {#{?REWRITES := true} = Opts, Rep}) when is_list(Arr) ->
+    couch_log:error("~n ====================3 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?REWRITES, length(Arr), Rep)};
 check(?SHOWS, #{} = Obj, {#{?SHOWS := true} = Opts, Rep}) ->
+    couch_log:error("~n ====================4 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?SHOWS, map_size(Obj), Rep)};
 check(?LISTS, #{} = Obj, {#{?LISTS := true} = Opts, Rep}) ->
+    couch_log:error("~n ====================5 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?LISTS, map_size(Obj), Rep)};
 check(?FILTERS, #{} = Obj, {#{?FILTERS := true} = Opts, Rep}) ->
+    couch_log:error("~n ====================6 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?FILTERS, map_size(Obj), Rep)};
 check(?VDU, <<_/binary>>, {#{?VDU := true} = Opts, Rep}) ->
+    couch_log:error("~n ====================7 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?VDU, 1, Rep)};
 check(?VIEWS, #{} = Views, {#{?REDUCE := true} = Opts, Rep}) ->
+    couch_log:error("~n ====================8 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {_, Rep1} = maps:fold(fun check_view/3, {Opts, Rep}, Views),
     {Opts, Rep1};
 check(<<_/binary>>, _, {#{} = Opts, #{} = Rep}) ->
+    couch_log:error("~n ====================9 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, Rep}.
 
 check_view(_Name, #{?REDUCE := <<"_", _/binary>>}, {#{} = Opts, #{} = Rep}) ->
+    couch_log:error("~n ====================1 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     % Built-in reducers
     {Opts, Rep};
 check_view(_Name, #{?REDUCE := <<_/binary>>}, {#{} = Opts, #{} = Rep}) ->
+    couch_log:error("~n ====================2 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, bump(?REDUCE, 1, Rep)};
 check_view(_Name, _, {#{} = Opts, #{} = Rep}) ->
+    couch_log:error("~n ====================3 ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Opts, Rep}.
 
 bump(Field, N, #{} = Rep) ->
     maps:update_with(Field, fun(V) -> V + N end, N, Rep).
 
 report(#st{} = St, _, _, #{} = Report) when map_size(Report) == 0 ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     St;
 report(#st{} = St, DbName, DDocId, #{} = Report) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n++++++ DbName: ~p~n", [DbName]),
+    io:format("~n++++++ DDocId: ~p~n", [DDocId]),
+    io:format("~n++++++ Report: ~p~n", [Report]),
     #st{report = Total, dbname = PrevDbName} = St,
+    io:format("~n++++++ Total: ~p~n", [Total]),
+    io:format("~n++++++ PrevDbName: ~p~n", [PrevDbName]),
     report_per_ddoc(#st{} = St, DbName, DDocId, Report),
     case is_binary(PrevDbName) andalso DbName =/= PrevDbName of
         true ->
@@ -200,31 +231,44 @@ report(#st{} = St, DbName, DDocId, #{} = Report) ->
     end.
 
 merge_report(#{} = Total, #{} = Update) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     Fun = fun(_K, V1, V2) -> V1 + V2 end,
     maps:merge_with(Fun, Total, Update).
 
 report_per_db(#st{sid = SId}, DbName, #{} = Report) when
     map_size(Report) > 0, is_binary(DbName)
 ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Fmt, Args} = report_fmt(Report),
     Meta = #{sid => SId, db => DbName},
     ?WARN(Fmt, Args, Meta);
 report_per_db(#st{}, _, _) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     ok.
 
 report_per_ddoc(#st{ddoc_report = false}, _DbName, _DDocId, _Report) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     ok;
 report_per_ddoc(#st{ddoc_report = true, sid = SId}, DbName, DDocId, Report) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {Fmt, Args} = report_fmt(Report),
     Meta = #{sid => SId, db => DbName, ddoc => DDocId},
+    io:format("~n++++++ Meta: ~p~n", [Meta]),
     ?WARN(Fmt, Args, Meta).
 
 report_fmt(Report) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n++++++ Report: ~p~n", [Report]),
     Sorted = lists:sort(maps:to_list(Report)),
+    io:format("~n++++++ Sorted: ~p~n", [Sorted]),
     FmtArgs = [{"~s:~p ", [K, V]} || {K, V} <- Sorted],
+    io:format("~n++++++ FmtArgs: ~p~n", [FmtArgs]),
     {Fmt1, Args1} = lists:unzip(FmtArgs),
+    io:format("~n++++++ {Fmt1, Args1}: ~p~n", [{Fmt1, Args1}]),
     Fmt2 = lists:flatten(Fmt1),
+    io:format("~n++++++ Fmt2: ~p~n", [Fmt2]),
     Args2 = lists:flatten(Args1),
+    io:format("~n++++++ Args2: ~p~n", [Args2]),
     {Fmt2, Args2}.
 
 opts() ->

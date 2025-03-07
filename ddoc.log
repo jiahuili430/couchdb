@@ -1,0 +1,629 @@
+[info] 2025-03-07T21:38:03.127760Z node1@127.0.0.1 <0.264.0> -------- Preflight check: Checking For Monsters
+
+[info] 2025-03-07T21:38:03.127835Z node1@127.0.0.1 <0.264.0> -------- Preflight check: Asserting Admin Account
+
+[info] 2025-03-07T21:38:03.129056Z node1@127.0.0.1 <0.264.0> -------- Apache CouchDB 3.4.2-2e82054-dirty is starting.
+
+[info] 2025-03-07T21:38:03.129110Z node1@127.0.0.1 <0.265.0> -------- Starting couch_sup
+[info] 2025-03-07T21:38:03.171456Z node1@127.0.0.1 <0.264.0> -------- Apache CouchDB has started. Time to relax.
+
+[notice] 2025-03-07T21:38:03.175502Z node1@127.0.0.1 <0.412.0> -------- rexi_server : started servers
+[notice] 2025-03-07T21:38:03.176370Z node1@127.0.0.1 <0.416.0> -------- rexi_buffer : started servers
+[notice] 2025-03-07T21:38:03.213459Z node1@127.0.0.1 <0.449.0> -------- mem3_reshard_dbdoc start init()
+[notice] 2025-03-07T21:38:03.215349Z node1@127.0.0.1 <0.451.0> -------- mem3_reshard start init()
+[notice] 2025-03-07T21:38:03.215392Z node1@127.0.0.1 <0.452.0> -------- mem3_reshard db monitor <0.452.0> starting
+[notice] 2025-03-07T21:38:03.216839Z node1@127.0.0.1 <0.451.0> -------- mem3_reshard starting reloading jobs
+[notice] 2025-03-07T21:38:03.217076Z node1@127.0.0.1 <0.451.0> -------- mem3_reshard finished reloading jobs
+[info] 2025-03-07T21:38:03.223196Z node1@127.0.0.1 <0.458.0> -------- Apache CouchDB has started. Time to relax.
+
+[info] 2025-03-07T21:38:03.223362Z node1@127.0.0.1 <0.458.0> -------- Apache CouchDB has started on http://127.0.0.1:15984/
+[info] 2025-03-07T21:38:03.223402Z node1@127.0.0.1 <0.458.0> -------- Apache CouchDB has started on http://127.0.0.1:15986/
+[notice] 2025-03-07T21:38:03.247020Z node1@127.0.0.1 <0.554.0> -------- All system databases exist.
+[info] 2025-03-07T21:38:03.272396Z node1@127.0.0.1 <0.638.0> -------- couch_scanner_server : starting couch_scanner_plugin_ddoc_features
+[error] 2025-03-07T21:38:03.273548Z node1@127.0.0.1 <0.638.0> -------- 
+ ==================== 
+ couch_scanner_plugin:spawn_link@182
+[error] 2025-03-07T21:38:03.273584Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:run@203
+[error] 2025-03-07T21:38:03.274602Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:init_config@220
+[error] 2025-03-07T21:38:03.275353Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:init_from_checkpoint@228
+[error] 2025-03-07T21:38:03.280247Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:start_callback@510
+[error] 2025-03-07T21:38:03.280281Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:start@75
+[error] 2025-03-07T21:38:03.280298Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:init_config@145
+[info] 2025-03-07T21:38:03.280336Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 Starting.
+[error] 2025-03-07T21:38:03.280353Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:start_checkpoint@555
+[error] 2025-03-07T21:38:03.280370Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:checkpoint_callback@567
+[error] 2025-03-07T21:38:03.280383Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:checkpoint@108
+[error] 2025-03-07T21:38:03.281830Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:scan_dbs@281
+[error] 2025-03-07T21:38:03.282069Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:scan_dbs_fold@295
+[error] 2025-03-07T21:38:03.282096Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:maybe_checkpoint@429
+[error] 2025-03-07T21:38:03.282218Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:shards@644
+[error] 2025-03-07T21:38:03.282249Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_by_range@657
+[error] 2025-03-07T21:38:03.282274Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_db@314
+[error] 2025-03-07T21:38:03.282295Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:db@118
+[error] 2025-03-07T21:38:03.282310Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:rate_limit@441
+[error] 2025-03-07T21:38:03.301166Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_ddocs_fold@338
+[error] 2025-03-07T21:38:03.301217Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================3 
+ couch_scanner_plugin:scan_ddocs_fold@345
+[error] 2025-03-07T21:38:03.301259Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_callback@547
+[error] 2025-03-07T21:38:03.301286Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_shards@352
+[error] 2025-03-07T21:38:03.301311Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:scan_dbs_fold@295
+[error] 2025-03-07T21:38:03.301332Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:maybe_checkpoint@429
+[error] 2025-03-07T21:38:03.301495Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:shards@644
+[error] 2025-03-07T21:38:03.301555Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_by_range@657
+[error] 2025-03-07T21:38:03.301583Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_db@314
+[error] 2025-03-07T21:38:03.301604Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:db@118
+[error] 2025-03-07T21:38:03.301626Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:rate_limit@441
+[error] 2025-03-07T21:38:03.313648Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_ddocs_fold@338
+[error] 2025-03-07T21:38:03.315044Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_ddocs_fold@341
+[error] 2025-03-07T21:38:03.315093Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin_ddoc_features:ddoc@131
+[error] 2025-03-07T21:38:03.315128Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================3 
+ couch_scanner_plugin:scan_ddocs_fold@345
+[error] 2025-03-07T21:38:03.315199Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_callback@547
+[error] 2025-03-07T21:38:03.315232Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_shards@352
+[error] 2025-03-07T21:38:03.315268Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:scan_dbs_fold@295
+[error] 2025-03-07T21:38:03.315297Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:maybe_checkpoint@429
+[error] 2025-03-07T21:38:03.315622Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:shards@644
+[error] 2025-03-07T21:38:03.315693Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_by_range@657
+[error] 2025-03-07T21:38:03.315737Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_db@314
+[error] 2025-03-07T21:38:03.315774Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:db@118
+[error] 2025-03-07T21:38:03.315815Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:rate_limit@441
+[error] 2025-03-07T21:38:03.329281Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_ddocs_fold@338
+[error] 2025-03-07T21:38:03.329379Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_ddocs_fold@341
+[error] 2025-03-07T21:38:03.329425Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin_ddoc_features:ddoc@135
+[error] 2025-03-07T21:38:03.329463Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:check_ddoc@158
+
+++++++ BEFORE St: {st,<<"1741383483-297d36f44a40">>,undefined,#{},
+                      #{<<"filters">> => true,<<"lists">> => true,
+                        <<"reduce">> => false,<<"rewrites">> => true,
+                        <<"shows">> => true,<<"updates">> => true,
+                        <<"validate_doc_update">> => false},
+                      true,true}
+[error] 2025-03-07T21:38:03.329809Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================6 
+ couch_scanner_plugin_ddoc_features:check@183
+
+++++++ AFTER St: {st,<<"1741383483-297d36f44a40">>,undefined,#{},
+                     #{<<"filters">> => true,<<"lists">> => true,
+                       <<"reduce">> => false,<<"rewrites">> => true,
+                       <<"shows">> => true,<<"updates">> => true,
+                       <<"validate_doc_update">> => false},
+                     true,true}
+[error] 2025-03-07T21:38:03.329851Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+[error] 2025-03-07T21:38:03.330040Z node1@127.0.0.1 <0.641.0> -------- 
+++++++
+ couch_scanner_plugin_ddoc_features:check_ddoc@164
+ Report:#{<<"filters">> => 1}
+
+
+++++++ DbName: <<"db">>
+[error] 2025-03-07T21:38:03.330068Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report@214
+
+++++++ DDocId: <<"_design/ddoc_custom">>
+
+++++++ Report: #{<<"filters">> => 1}
+
+++++++ Total: #{}
+
+++++++ PrevDbName: undefined
+
+++++++ Report: #{<<"filters">> => 1}
+[error] 2025-03-07T21:38:03.330497Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_per_ddoc@253
+[error] 2025-03-07T21:38:03.330528Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_fmt@260
+
+++++++ Sorted: [{<<"filters">>,1}]
+
+++++++ FmtArgs: [{"~s:~p ",[<<"filters">>,1]}]
+
+++++++ {Fmt1, Args1}: {["~s:~p "],[[<<"filters">>,1]]}
+
+++++++ Fmt2: "~s:~p "
+
+++++++ Args2: [<<"filters">>,1]
+
+++++++ Meta: #{db => <<"db">>,ddoc => <<"_design/ddoc_custom">>,
+               sid => <<"1741383483-297d36f44a40">>}
+[warning] 2025-03-07T21:38:03.331057Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 db:db ddoc:_design/ddoc_custom filters:1 
+[error] 2025-03-07T21:38:03.331092Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:merge_report@234
+[error] 2025-03-07T21:38:03.331124Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_ddocs_fold@341
+[error] 2025-03-07T21:38:03.331159Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin_ddoc_features:ddoc@135
+
+++++++ BEFORE St: {st,<<"1741383483-297d36f44a40">>,<<"db">>,
+                      #{<<"filters">> => 1},
+                      #{<<"filters">> => true,<<"lists">> => true,
+                        <<"reduce">> => false,<<"rewrites">> => true,
+                        <<"shows">> => true,<<"updates">> => true,
+                        <<"validate_doc_update">> => false},
+                      true,true}
+[error] 2025-03-07T21:38:03.331188Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:check_ddoc@158
+[error] 2025-03-07T21:38:03.331382Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+[error] 2025-03-07T21:38:03.331411Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================4 
+ couch_scanner_plugin_ddoc_features:check@177
+
+++++++ AFTER St: {st,<<"1741383483-297d36f44a40">>,<<"db">>,
+                     #{<<"filters">> => 1},
+                     #{<<"filters">> => true,<<"lists">> => true,
+                       <<"reduce">> => false,<<"rewrites">> => true,
+                       <<"shows">> => true,<<"updates">> => true,
+                       <<"validate_doc_update">> => false},
+                     true,true}
+
+++++++ DbName: <<"db">>
+[error] 2025-03-07T21:38:03.331562Z node1@127.0.0.1 <0.641.0> -------- 
+++++++
+ couch_scanner_plugin_ddoc_features:check_ddoc@164
+ Report:#{<<"shows">> => 2}
+
+[error] 2025-03-07T21:38:03.331595Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report@214
+
+++++++ DDocId: <<"_design/ddoc_shows">>
+
+++++++ Report: #{<<"shows">> => 2}
+
+++++++ Total: #{<<"filters">> => 1}
+
+++++++ PrevDbName: <<"db">>
+[error] 2025-03-07T21:38:03.331945Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_per_ddoc@253
+
+++++++ Report: #{<<"shows">> => 2}
+[error] 2025-03-07T21:38:03.331981Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_fmt@260
+
+++++++ Sorted: [{<<"shows">>,2}]
+
+++++++ FmtArgs: [{"~s:~p ",[<<"shows">>,2]}]
+
+++++++ {Fmt1, Args1}: {["~s:~p "],[[<<"shows">>,2]]}
+
+++++++ Fmt2: "~s:~p "
+
+++++++ Args2: [<<"shows">>,2]
+
+++++++ Meta: #{db => <<"db">>,ddoc => <<"_design/ddoc_shows">>,
+               sid => <<"1741383483-297d36f44a40">>}
+[warning] 2025-03-07T21:38:03.332418Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 db:db ddoc:_design/ddoc_shows shows:2 
+[error] 2025-03-07T21:38:03.332447Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:merge_report@234
+[error] 2025-03-07T21:38:03.332474Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_ddocs_fold@341
+[error] 2025-03-07T21:38:03.332504Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin_ddoc_features:ddoc@135
+
+++++++ BEFORE St: {st,<<"1741383483-297d36f44a40">>,<<"db">>,
+                      #{<<"filters">> => 1,<<"shows">> => 2},
+                      #{<<"filters">> => true,<<"lists">> => true,
+                        <<"reduce">> => false,<<"rewrites">> => true,
+                        <<"shows">> => true,<<"updates">> => true,
+                        <<"validate_doc_update">> => false},
+                      true,true}
+[error] 2025-03-07T21:38:03.332531Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:check_ddoc@158
+[error] 2025-03-07T21:38:03.332709Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+[error] 2025-03-07T21:38:03.332741Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+
+++++++ AFTER St: {st,<<"1741383483-297d36f44a40">>,<<"db">>,
+                     #{<<"filters">> => 1,<<"shows">> => 2},
+                     #{<<"filters">> => true,<<"lists">> => true,
+                       <<"reduce">> => false,<<"rewrites">> => true,
+                       <<"shows">> => true,<<"updates">> => true,
+                       <<"validate_doc_update">> => false},
+                     true,true}
+[error] 2025-03-07T21:38:03.332884Z node1@127.0.0.1 <0.641.0> -------- 
+++++++
+ couch_scanner_plugin_ddoc_features:check_ddoc@164
+ Report:#{}
+
+[error] 2025-03-07T21:38:03.332912Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report@211
+[error] 2025-03-07T21:38:03.332939Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================3 
+ couch_scanner_plugin:scan_ddocs_fold@345
+[error] 2025-03-07T21:38:03.332990Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_callback@547
+[error] 2025-03-07T21:38:03.333011Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_shards@352
+[error] 2025-03-07T21:38:03.333035Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:scan_dbs_fold@295
+[error] 2025-03-07T21:38:03.333053Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:maybe_checkpoint@429
+[error] 2025-03-07T21:38:03.333206Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:shards@644
+[error] 2025-03-07T21:38:03.333243Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_by_range@657
+[error] 2025-03-07T21:38:03.333273Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_db@314
+[error] 2025-03-07T21:38:03.333295Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:db@118
+[error] 2025-03-07T21:38:03.333313Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:rate_limit@441
+[error] 2025-03-07T21:38:03.345632Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_ddocs_fold@338
+[error] 2025-03-07T21:38:03.345769Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_ddocs_fold@341
+[error] 2025-03-07T21:38:03.345815Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin_ddoc_features:ddoc@135
+[error] 2025-03-07T21:38:03.345840Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:check_ddoc@158
+
+++++++ BEFORE St: {st,<<"1741383483-297d36f44a40">>,<<"db">>,
+                      #{<<"filters">> => 1,<<"shows">> => 2},
+                      #{<<"filters">> => true,<<"lists">> => true,
+                        <<"reduce">> => false,<<"rewrites">> => true,
+                        <<"shows">> => true,<<"updates">> => true,
+                        <<"validate_doc_update">> => false},
+                      true,true}
+[error] 2025-03-07T21:38:03.346026Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================6 
+ couch_scanner_plugin_ddoc_features:check@183
+[error] 2025-03-07T21:38:03.346062Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+
+++++++ AFTER St: {st,<<"1741383483-297d36f44a40">>,<<"db">>,
+                     #{<<"filters">> => 1,<<"shows">> => 2},
+                     #{<<"filters">> => true,<<"lists">> => true,
+                       <<"reduce">> => false,<<"rewrites">> => true,
+                       <<"shows">> => true,<<"updates">> => true,
+                       <<"validate_doc_update">> => false},
+                     true,true}
+[error] 2025-03-07T21:38:03.346210Z node1@127.0.0.1 <0.641.0> -------- 
+++++++
+ couch_scanner_plugin_ddoc_features:check_ddoc@164
+ Report:#{<<"filters">> => 1}
+
+
+++++++ DbName: <<"db2">>
+
+++++++ DDocId: <<"_design/ddoc_custom">>
+[error] 2025-03-07T21:38:03.346242Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report@214
+
+++++++ Report: #{<<"filters">> => 1}
+
+++++++ Total: #{<<"filters">> => 1,<<"shows">> => 2}
+
+++++++ PrevDbName: <<"db">>
+[error] 2025-03-07T21:38:03.346513Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_per_ddoc@253
+
+++++++ Report: #{<<"filters">> => 1}
+[error] 2025-03-07T21:38:03.346565Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_fmt@260
+
+++++++ Sorted: [{<<"filters">>,1}]
+
+++++++ FmtArgs: [{"~s:~p ",[<<"filters">>,1]}]
+
+++++++ {Fmt1, Args1}: {["~s:~p "],[[<<"filters">>,1]]}
+
+++++++ Fmt2: "~s:~p "
+
+++++++ Args2: [<<"filters">>,1]
+
+++++++ Meta: #{db => <<"db2">>,ddoc => <<"_design/ddoc_custom">>,
+               sid => <<"1741383483-297d36f44a40">>}
+[warning] 2025-03-07T21:38:03.346858Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 db:db2 ddoc:_design/ddoc_custom filters:1 
+
+++++++ Report: #{<<"filters">> => 1,<<"shows">> => 2}
+[error] 2025-03-07T21:38:03.346886Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_per_db@241
+[error] 2025-03-07T21:38:03.346911Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_fmt@260
+
+++++++ Sorted: [{<<"filters">>,1},{<<"shows">>,2}]
+
+++++++ FmtArgs: [{"~s:~p ",[<<"filters">>,1]},{"~s:~p ",[<<"shows">>,2]}]
+
+++++++ {Fmt1, Args1}: {["~s:~p ","~s:~p "],
+                       [[<<"filters">>,1],[<<"shows">>,2]]}
+
+++++++ Fmt2: "~s:~p ~s:~p "
+
+++++++ Args2: [<<"filters">>,1,<<"shows">>,2]
+[warning] 2025-03-07T21:38:03.347184Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 db:db filters:1 shows:2 
+[error] 2025-03-07T21:38:03.347216Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_ddocs_fold@341
+[error] 2025-03-07T21:38:03.347244Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin_ddoc_features:ddoc@135
+[error] 2025-03-07T21:38:03.347269Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:check_ddoc@158
+
+++++++ BEFORE St: {st,<<"1741383483-297d36f44a40">>,<<"db2">>,
+                      #{<<"filters">> => 1},
+                      #{<<"filters">> => true,<<"lists">> => true,
+                        <<"reduce">> => false,<<"rewrites">> => true,
+                        <<"shows">> => true,<<"updates">> => true,
+                        <<"validate_doc_update">> => false},
+                      true,true}
+[error] 2025-03-07T21:38:03.347388Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+[error] 2025-03-07T21:38:03.347416Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================4 
+ couch_scanner_plugin_ddoc_features:check@177
+
+++++++ AFTER St: {st,<<"1741383483-297d36f44a40">>,<<"db2">>,
+                     #{<<"filters">> => 1},
+                     #{<<"filters">> => true,<<"lists">> => true,
+                       <<"reduce">> => false,<<"rewrites">> => true,
+                       <<"shows">> => true,<<"updates">> => true,
+                       <<"validate_doc_update">> => false},
+                     true,true}
+
+++++++ DbName: <<"db2">>
+[error] 2025-03-07T21:38:03.347587Z node1@127.0.0.1 <0.641.0> -------- 
+++++++
+ couch_scanner_plugin_ddoc_features:check_ddoc@164
+ Report:#{<<"shows">> => 2}
+
+[error] 2025-03-07T21:38:03.347615Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report@214
+
+++++++ DDocId: <<"_design/ddoc_shows">>
+
+++++++ Report: #{<<"shows">> => 2}
+
+++++++ Total: #{<<"filters">> => 1}
+
+++++++ PrevDbName: <<"db2">>
+[error] 2025-03-07T21:38:03.347866Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_per_ddoc@253
+
+++++++ Report: #{<<"shows">> => 2}
+[error] 2025-03-07T21:38:03.347896Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_fmt@260
+
+++++++ Sorted: [{<<"shows">>,2}]
+
+++++++ FmtArgs: [{"~s:~p ",[<<"shows">>,2]}]
+
+++++++ {Fmt1, Args1}: {["~s:~p "],[[<<"shows">>,2]]}
+
+++++++ Fmt2: "~s:~p "
+
+++++++ Args2: [<<"shows">>,2]
+
+++++++ Meta: #{db => <<"db2">>,ddoc => <<"_design/ddoc_shows">>,
+               sid => <<"1741383483-297d36f44a40">>}
+[warning] 2025-03-07T21:38:03.348218Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 db:db2 ddoc:_design/ddoc_shows shows:2 
+[error] 2025-03-07T21:38:03.348248Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:merge_report@234
+[error] 2025-03-07T21:38:03.348283Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin:scan_ddocs_fold@341
+[error] 2025-03-07T21:38:03.348310Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================2 
+ couch_scanner_plugin_ddoc_features:ddoc@135
+[error] 2025-03-07T21:38:03.348334Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:check_ddoc@158
+
+++++++ BEFORE St: {st,<<"1741383483-297d36f44a40">>,<<"db2">>,
+                      #{<<"filters">> => 1,<<"shows">> => 2},
+                      #{<<"filters">> => true,<<"lists">> => true,
+                        <<"reduce">> => false,<<"rewrites">> => true,
+                        <<"shows">> => true,<<"updates">> => true,
+                        <<"validate_doc_update">> => false},
+                      true,true}
+[error] 2025-03-07T21:38:03.348488Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+[error] 2025-03-07T21:38:03.348513Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================9 
+ couch_scanner_plugin_ddoc_features:check@193
+
+++++++ AFTER St: {st,<<"1741383483-297d36f44a40">>,<<"db2">>,
+                     #{<<"filters">> => 1,<<"shows">> => 2},
+                     #{<<"filters">> => true,<<"lists">> => true,
+                       <<"reduce">> => false,<<"rewrites">> => true,
+                       <<"shows">> => true,<<"updates">> => true,
+                       <<"validate_doc_update">> => false},
+                     true,true}
+[error] 2025-03-07T21:38:03.348634Z node1@127.0.0.1 <0.641.0> -------- 
+++++++
+ couch_scanner_plugin_ddoc_features:check_ddoc@164
+ Report:#{}
+
+[error] 2025-03-07T21:38:03.348656Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report@211
+[error] 2025-03-07T21:38:03.348683Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================3 
+ couch_scanner_plugin:scan_ddocs_fold@345
+[error] 2025-03-07T21:38:03.348761Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:shards_callback@547
+[error] 2025-03-07T21:38:03.348793Z node1@127.0.0.1 <0.641.0> -------- 
+ ====================1 
+ couch_scanner_plugin:scan_shards@352
+[error] 2025-03-07T21:38:03.348817Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin:finalize@470
+[error] 2025-03-07T21:38:03.348836Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:complete@102
+[error] 2025-03-07T21:38:03.348861Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_per_db@241
+
+++++++ Report: #{<<"filters">> => 1,<<"shows">> => 2}
+[error] 2025-03-07T21:38:03.348878Z node1@127.0.0.1 <0.641.0> -------- 
+ ==================== 
+ couch_scanner_plugin_ddoc_features:report_fmt@260
+
+++++++ Sorted: [{<<"filters">>,1},{<<"shows">>,2}]
+
+++++++ FmtArgs: [{"~s:~p ",[<<"filters">>,1]},{"~s:~p ",[<<"shows">>,2]}]
+
+++++++ {Fmt1, Args1}: {["~s:~p ","~s:~p "],
+                       [[<<"filters">>,1],[<<"shows">>,2]]}
+
+++++++ Fmt2: "~s:~p ~s:~p "
+
+++++++ Args2: [<<"filters">>,1,<<"shows">>,2]
+[warning] 2025-03-07T21:38:03.349188Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 db:db2 filters:1 shows:2 
+[info] 2025-03-07T21:38:03.349211Z node1@127.0.0.1 <0.641.0> -------- couch_scanner_plugin_ddoc_features s:1741383483-297d36f44a40 Completed
+[notice] 2025-03-07T21:38:03.350106Z node1@127.0.0.1 <0.638.0> -------- couch_scanner_server : couch_scanner_plugin_ddoc_features finished
+[notice] 2025-03-07T21:38:03.452561Z node1@127.0.0.1 <0.462.0> ec01f1817e 127.0.0.1:15984 127.0.0.1 undefined GET / 200 ok 23
+[notice] 2025-03-07T21:38:03.463481Z node1@127.0.0.1 <0.464.0> 66698b7a7d Setup: [{<<"action">>,<<"enable_cluster">>},{<<"bind_address">>,<<"0.0.0.0">>},{<<"username">>,<<"adm">>},{<<"password">>,<<"****">>},{<<"node_count">>,1}]
+
+[notice] 2025-03-07T21:38:03.464497Z node1@127.0.0.1 <0.146.0> -------- config: [admins] adm set to '****' for reason nil
+[notice] 2025-03-07T21:38:03.848499Z node1@127.0.0.1 <0.146.0> -------- config: [admins] adm set to '****' for reason nil
+[notice] 2025-03-07T21:38:04.466645Z node1@127.0.0.1 <0.146.0> -------- config: [chttpd] bind_address set to 0.0.0.0 for reason nil
+[error] 2025-03-07T21:38:04.467996Z node1@127.0.0.1 <0.459.0> -------- Supervisor chttpd_sup had child chttpd started with chttpd:start_link() at <0.461.0> exit with reason normal in context child_terminated
+[error] 2025-03-07T21:38:04.468060Z node1@127.0.0.1 <0.459.0> -------- Supervisor chttpd_sup had child chttpd started with chttpd:start_link() at <0.461.0> exit with reason normal in context child_terminated
+[notice] 2025-03-07T21:38:04.468331Z node1@127.0.0.1 <0.146.0> -------- config: [cluster] n set to 1 for reason nil
+[notice] 2025-03-07T21:38:04.469530Z node1@127.0.0.1 <0.464.0> 66698b7a7d 127.0.0.1:15984 127.0.0.1 adm POST /_cluster_setup 201 ok 1010
+[notice] 2025-03-07T21:38:05.007280Z node1@127.0.0.1 <0.697.0> ef333ef1af Setup: [{<<"action">>,<<"finish_cluster">>}]
+
+[notice] 2025-03-07T21:38:05.007322Z node1@127.0.0.1 <0.697.0> ef333ef1af finish_cluster: [{<<"action">>,<<"finish_cluster">>}]
+
+[notice] 2025-03-07T21:38:05.011054Z node1@127.0.0.1 <0.697.0> ef333ef1af 127.0.0.1:15984 127.0.0.1 adm POST /_cluster_setup 400 ok 540
+[notice] 2025-03-07T21:38:08.242746Z node1@127.0.0.1 <0.538.0> -------- Started replicator db changes listener <0.813.0>
+[notice] 2025-03-07T21:38:18.177176Z node1@127.0.0.1 <0.412.0> -------- rexi_server : cluster stable
+[notice] 2025-03-07T21:38:18.177175Z node1@127.0.0.1 <0.416.0> -------- rexi_buffer : cluster stable
