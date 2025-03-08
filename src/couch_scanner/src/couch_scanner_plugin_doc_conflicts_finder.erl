@@ -20,7 +20,6 @@
   checkpoint/1,
   db/2,
   doc_id/3
-%%  ddoc/3
 ]).
 
 -include_lib("couch_scanner/include/couch_scanner_plugin.hrl").
@@ -31,15 +30,17 @@
   dbname,
   report = #{},
   run_on_first_node = true,
-  doc_report = false
+  doc_report = true
 }).
 
 -define(CONFLICTS, <<"conflicts">>).
 -define(DELETED_CONFLICTS, <<"deleted_conflicts">>).
+-define(REVS, <<"revs">>).
 
 -define(OPTS, #{
   ?CONFLICTS => true,
-  ?DELETED_CONFLICTS => true
+  ?DELETED_CONFLICTS => true,
+  ?REVS => true
 }).
 
 % Behavior callbacks
@@ -124,37 +125,7 @@ doc_id(#st{} = St, DocId, Db) ->
   io:format("~n++++++ doc_id Revs: ~p~n", [Revs]),
   io:format("~n++++++ doc_id is_list(Revs): ~p~n", [is_list(Revs)]),
   io:format("~n++++++ doc_id length(Revs): ~p~n", [length(Revs)]),
-  report(St, Db, DocId, Revs).
-
-
-%%  Conflicts:
-%%  [{<<"d1">>,1}]
-%%  DeletedConflicts:
-%%  [{<<"d1">>,1}]
-
-%%{ok, St}.
-
-%%doc_id(#st{} = St, <<?DESIGN_DOC_PREFIX, _/binary>>, _Db) ->
-%%  {skip, St};
-%%doc_id(#st{sid = SId, doc_cnt = C, max_docs = M} = St, _DocId, Db) when C > M ->
-%%  Meta = #{sid => SId, db => Db},
-%%  ?INFO("reached max docs ~p", [M], Meta),
-%%  {stop, St};
-%%doc_id(#st{doc_cnt = C, doc_step = S} = St, _DocId, _Db) when C rem S /= 0 ->
-%%  {skip, St#st{doc_cnt = C + 1}};
-%%doc_id(#st{doc_cnt = C} = St, _DocId, _Db) ->
-%%  {ok, St#st{doc_cnt = C + 1}}.
-
-
-%%ddoc(#st{} = St, _DbName, #doc{id = <<"_design/_", _/binary>>}) ->
-%%  % These are auto-inserted ddocs _design/_auth, etc.
-%%  {ok, St};
-%%ddoc(#st{} = St, DbName, #doc{} = DDoc) ->
-%%  #doc{body = {Props = [_ | _]}} = DDoc,
-%%  case couch_util:get_value(<<"language">>, Props, <<"javascript">>) of
-%%    <<"javascript">> -> {ok, check_ddoc(St, DbName, DDoc)};
-%%    _ -> {ok, St}
-%%  end.
+  {ok, report(St, Db, DocId, Revs)}.
 
 % Private
 
@@ -173,13 +144,18 @@ report(#st{} = St, _, _, Revs) when length(Revs) =< 1 ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
   io:format("~n++++++ report Revs: ~p~n", [Revs]),
   io:format("~n++++++ report length(Revs): ~p~n", [length(Revs)]),
-  {ok, St};
+  St;
 report(#st{opts = Opts} = St, Db, DocId, Revs) ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
   io:format("~n++++++ report Opts: ~p~n", [Opts]),
   io:format("~n++++++ report Db: ~p~n", [Db]),
   io:format("~n++++++ report DocId: ~p~n", [DocId]),
   io:format("~n++++++ report Revs: ~p~n", [Revs]),
+
+  ShardsDbName = couch_db:name(Db),
+  DbName = mem3:dbname(ShardsDbName),
+  io:format("~n++++++ ShardsDbName: ~p~n", [ShardsDbName]),
+  io:format("~n++++++ DbName: ~p~n", [DbName]),
 
   {DeletedConflicts, Conflicts} = lists:partition(fun(R) ->
     R#rev_info.deleted end, Revs),
@@ -206,42 +182,68 @@ report(#st{opts = Opts} = St, Db, DocId, Revs) ->
   io:format("~n++++++ report DeletedConflictsReport: ~p~n", [DeletedConflictsReport]),
   io:format("~n++++++ report Report: ~p~n", [Report]),
 
-
-
-%%  report_per_doc(#st{} = St, DbName, DDocId, Report),
-
-
   #st{report = Total, dbname = PrevDbName} = St,
   io:format("~n++++++ report Total: ~p~n", [Total]),
   io:format("~n++++++ report PrevDbName: ~p~n", [PrevDbName]),
-  {ok, St}.
 
-%%report(#st{} = St, _, _, #{} = Report) when map_size(Report) == 0 ->
-%%  St;
-%%report(#st{} = St, DbName, DDocId, #{} = Report) ->
-%%  #st{report = Total, dbname = PrevDbName} = St,
-%%  report_per_ddoc(#st{} = St, DbName, DDocId, Report),
-%%  case is_binary(PrevDbName) andalso DbName =/= PrevDbName of
-%%    true ->
-%%      % We switched dbs, so report stats for old db
-%%      % and make the new one the current one
-%%      report_per_db(St, PrevDbName, Total),
-%%      St#st{report = Report, dbname = DbName};
-%%    false ->
-%%      % Keep accumulating per-db stats
-%%      St#st{report = merge_report(Total, Report), dbname = DbName}
-%%  end.
+  DocReport =
+    case maps:get(?REVS, Opts) of
+      true ->
+        ConflictsRevs =
+          case maps:get(?CONFLICTS, Opts) of
+            true ->
+              #{?CONFLICTS => list_to_tuple([couch_doc:rev_to_str(R#rev_info.rev) || R <- Conflicts])};
+            false -> #{}
+          end,
+        DeletedConflictsRevs =
+          case maps:get(?DELETED_CONFLICTS, Opts) of
+            true ->
+              #{?DELETED_CONFLICTS => list_to_tuple([couch_doc:rev_to_str(R#rev_info.rev) || R <- DeletedConflicts])};
+            false -> #{}
+          end,
+        maps:merge(ConflictsRevs, DeletedConflictsRevs);
+      false -> Report
+    end,
+  report_per_doc(#st{} = St, DbName, DocId, DocReport),
+
+  case is_binary(PrevDbName) andalso DbName =/= PrevDbName of
+    true ->
+      % We switched dbs, so report stats for old db
+      % and make the new one the current one
+      report_per_db(St, PrevDbName, Total),
+      St#st{report = Report, dbname = DbName};
+    false ->
+      % Keep accumulating per-db stats
+      St#st{report = merge_report(Total, Report), dbname = DbName}
+  end.
+
+merge_report(#{} = Total, #{} = Update) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  Fun = fun(_K, V1, V2) -> V1 + V2 end,
+  maps:merge_with(Fun, Total, Update).
 
 report_per_db(#st{sid = SId}, DbName, #{} = Report) when
   map_size(Report) > 0, is_binary(DbName)
   ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
   {Fmt, Args} = report_fmt(Report),
+  io:format("~n++++++ Args: ~p~n", [Args]),
   Meta = #{sid => SId, db => DbName},
+  io:format("~n++++++ Meta: ~p~n", [Meta]),
   ?WARN(Fmt, Args, Meta);
 report_per_db(#st{}, _, _) ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
   ok.
+
+report_per_doc(#st{doc_report = false}, _DbName, _DocId, _Report) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  ok;
+report_per_doc(#st{doc_report = true, sid = SId}, DbName, DocId, Report) ->
+  couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+  {Fmt, Args} = report_fmt(Report),
+  Meta = #{sid => SId, db => DbName, doc => DocId},
+  io:format("~n++++++ Meta: ~p~n", [Meta]),
+  ?WARN(Fmt, Args, Meta).
 
 report_fmt(Report) ->
   couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
@@ -257,34 +259,6 @@ report_fmt(Report) ->
   Args2 = lists:flatten(Args1),
   io:format("~n++++++ Args2: ~p~n", [Args2]),
   {Fmt2, Args2}.
-
-%%merge_report(#{} = Total, #{} = Update) ->
-%%  Fun = fun(_K, V1, V2) -> V1 + V2 end,
-%%  maps:merge_with(Fun, Total, Update).
-%%
-%%report_per_db(#st{sid = SId}, DbName, #{} = Report) when
-%%  map_size(Report) > 0, is_binary(DbName)
-%%  ->
-%%  {Fmt, Args} = report_fmt(Report),
-%%  Meta = #{sid => SId, db => DbName},
-%%  ?WARN(Fmt, Args, Meta);
-%%report_per_db(#st{}, _, _) ->
-%%  ok.
-%%
-%%report_per_ddoc(#st{ddoc_report = false}, _DbName, _DDocId, _Report) ->
-%%  ok;
-%%report_per_ddoc(#st{ddoc_report = true, sid = SId}, DbName, DDocId, Report) ->
-%%  {Fmt, Args} = report_fmt(Report),
-%%  Meta = #{sid => SId, db => DbName, ddoc => DDocId},
-%%  ?WARN(Fmt, Args, Meta).
-%%
-%%report_fmt(Report) ->
-%%  Sorted = lists:sort(maps:to_list(Report)),
-%%  FmtArgs = [{"~s:~p ", [K, V]} || {K, V} <- Sorted],
-%%  {Fmt1, Args1} = lists:unzip(FmtArgs),
-%%  Fmt2 = lists:flatten(Fmt1),
-%%  Args2 = lists:flatten(Args1),
-%%  {Fmt2, Args2}.
 
 opts() ->
   Fun = fun(Key, Default) -> cfg_bool(binary_to_list(Key), Default) end,
