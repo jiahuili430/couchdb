@@ -568,9 +568,14 @@ db_req(
 db_req(#httpd{path_parts = [_, <<"_ensure_full_commit">>]} = Req, _Db) ->
     send_method_not_allowed(Req, "POST");
 db_req(#httpd{method = 'POST', path_parts = [_, <<"_bulk_docs">>], user_ctx = Ctx} = Req, Db) ->
+    couch_log:error("~n ==================== ~n ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
+    couch_log:error("~n++++++~n ~p:~p@~B~n Req:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Req]),
+    couch_log:error("~n++++++~n ~p:~p@~B~n Ctx:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Ctx]),
+    couch_log:error("~n++++++~n ~p:~p@~B~n Db:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Db]),
     couch_stats:increment_counter([couchdb, httpd, bulk_requests]),
     chttpd:validate_ctype(Req, "application/json"),
     {JsonProps} = chttpd:json_body_obj(Req),
+    couch_log:error("~n++++++~n ~p:~p@~B~n JsonProps:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, JsonProps]),
     DocsArray =
         case couch_util:get_value(<<"docs">>, JsonProps) of
             undefined ->
@@ -580,6 +585,7 @@ db_req(#httpd{method = 'POST', path_parts = [_, <<"_bulk_docs">>], user_ctx = Ct
             DocsArray0 ->
                 DocsArray0
         end,
+    couch_log:error("~n++++++~n ~p:~p@~B~n DocsArray:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, DocsArray]),
     couch_stats:update_histogram([couchdb, httpd, bulk_docs], length(DocsArray)),
     W =
         case couch_util:get_value(<<"w">>, JsonProps) of
@@ -588,6 +594,7 @@ db_req(#httpd{method = 'POST', path_parts = [_, <<"_bulk_docs">>], user_ctx = Ct
             _ ->
                 chttpd:qs_value(Req, "w", integer_to_list(mem3:quorum(Db)))
         end,
+    couch_log:error("~n++++++~n ~p:~p@~B~n W:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, W]),
     case chttpd:header_value(Req, "X-Couch-Full-Commit") of
         "true" ->
             Options = [full_commit, {user_ctx, Ctx}, {w, W}];
@@ -596,7 +603,9 @@ db_req(#httpd{method = 'POST', path_parts = [_, <<"_bulk_docs">>], user_ctx = Ct
         _ ->
             Options = [{user_ctx, Ctx}, {w, W}]
     end,
+    couch_log:error("~n++++++~n ~p:~p@~B~n Options:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Options]),
     NewEdits = couch_util:get_value(<<"new_edits">>, JsonProps, true),
+    couch_log:error("~n++++++~n ~p:~p@~B~n NewEdits:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, NewEdits]),
     Docs = lists:map(
         fun(JsonObj) ->
             Doc = couch_db:doc_from_json_obj_validate(Db, JsonObj),
@@ -609,6 +618,7 @@ db_req(#httpd{method = 'POST', path_parts = [_, <<"_bulk_docs">>], user_ctx = Ct
         end,
         DocsArray
     ),
+    couch_log:error("~n++++++~n ~p:~p@~B~n Docs:~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Docs]),
     case NewEdits of
         true ->
             Options2 =
@@ -650,16 +660,20 @@ db_req(#httpd{method = 'POST', path_parts = [_, <<"_bulk_docs">>], user_ctx = Ct
                     send_json(Req, 417, ErrorsJson)
             end;
         false ->
+            io:format("~n++++++ false-> [?REPLICATED_CHANGES | Options]: ~p~n", [[?REPLICATED_CHANGES | Options]]),
             case fabric:update_docs(Db, Docs, [?REPLICATED_CHANGES | Options]) of
                 {ok, Errors} ->
+                    io:format("~n++++++ {ok, Errors}->Errors: ~p~n", [Errors]),
                     chttpd_stats:incr_writes(length(Docs)),
                     ErrorsJson = lists:map(fun update_doc_result_to_json/1, Errors),
                     send_json(Req, 201, ErrorsJson);
                 {accepted, Errors} ->
+                    io:format("~n++++++ {accepted, Errors}->Errors: ~p~n", [Errors]),
                     chttpd_stats:incr_writes(length(Docs)),
                     ErrorsJson = lists:map(fun update_doc_result_to_json/1, Errors),
                     send_json(Req, 202, ErrorsJson);
                 {error, Errors} ->
+                    io:format("~n++++++ {error,Errors}->Errors: ~p~n", [Errors]),
                     chttpd_stats:incr_writes(length(Docs)),
                     ErrorsJson = lists:map(fun update_doc_result_to_json/1, Errors),
                     send_json(Req, 500, ErrorsJson)
