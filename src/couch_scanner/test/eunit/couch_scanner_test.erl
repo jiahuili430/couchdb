@@ -26,6 +26,7 @@ couch_scanner_test_() ->
             ?TDEF_FE(t_run_through_all_callbacks_basic, 10),
             ?TDEF_FE(t_find_reporting_works, 10),
             ?TDEF_FE(t_ddoc_features_works, 20),
+            ?TDEF_FE(t_conflict_finder_works, 10),
             ?TDEF_FE(t_config_skips, 10),
             ?TDEF_FE(t_resume_after_error, 10),
             ?TDEF_FE(t_reset, 10),
@@ -41,6 +42,7 @@ couch_scanner_test_() ->
 
 -define(FIND_PLUGIN, couch_scanner_plugin_find).
 -define(FEATURES_PLUGIN, couch_scanner_plugin_ddoc_features).
+-define(CONFLICTS_PLUGIN, couch_scanner_plugin_conflict_finder).
 
 setup() ->
     {module, _} = code:ensure_loaded(?FIND_PLUGIN),
@@ -155,6 +157,33 @@ t_find_reporting_works(_) ->
     ?assertEqual(3, log_calls(warning)).
 
 t_ddoc_features_works({_, {_, DbName2}}) ->
+    % Run the "ddoc_features" plugin
+    Plugin = atom_to_list(?FEATURES_PLUGIN),
+    config:set(Plugin, "filters", "true", false),
+    config:set(Plugin, "reduce", "true", false),
+    config:set(Plugin, "validate_doc_update", "true", false),
+    meck:reset(couch_scanner_server),
+    meck:reset(couch_scanner_util),
+    config:set("couch_scanner_plugins", Plugin, "true", false),
+    wait_exit(10000),
+    LogArgs = [warning, ?FEATURES_PLUGIN, '_', '_', '_'],
+    ?assertEqual(1, meck:num_calls(couch_scanner_util, log, LogArgs)),
+    % Add a detectable feature to the second db.
+    % Expect two reports written
+    ok = add_doc(DbName2, <<"_design/doc42">>, #{
+        rewrites => <<"function(r) {return r;}">>
+    }),
+    config:set("couch_scanner", "interval_sec", "1", false),
+    couch_scanner:resume(),
+    meck:reset(couch_scanner_server),
+    meck:reset(couch_scanner_util),
+    Now = erlang:system_time(second),
+    TStamp = calendar:system_time_to_rfc3339(Now + 1, [{offset, "Z"}]),
+    config:set(Plugin, "after", TStamp, false),
+    wait_exit(10000),
+    ?assertEqual(2, meck:num_calls(couch_scanner_util, log, LogArgs)).
+
+t_conflict_finder_works({_, {_, DbName2}}) ->
     % Run the "ddoc_features" plugin
     Plugin = atom_to_list(?FEATURES_PLUGIN),
     config:set(Plugin, "filters", "true", false),
