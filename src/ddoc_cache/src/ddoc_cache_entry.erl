@@ -264,6 +264,7 @@ start_timer() ->
     TimeOut = config:get_integer(
         "ddoc_cache", "refresh_timeout", ?REFRESH_TIMEOUT
     ),
+    io:format("+++ ~p/~p()@~B -> ddoc_cache:refresh_timeout TimeOut: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, TimeOut]),
     erlang:send_after(TimeOut, self(), {'$gen_cast', refresh}).
 
 do_open(Key) ->

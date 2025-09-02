@@ -380,6 +380,7 @@ cookie_authentication_handler(#httpd{mochi_req = MochiReq} = Req, AuthModule) ->
                             Timeout = chttpd_util:get_chttpd_auth_config_integer(
                                 "timeout", 600
                             ),
+                            io:format("+++ ~p/~p()@~B -> chttpd_auth Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
                             couch_log:debug("timeout ~p", [Timeout]),
                             case (catch erlang:list_to_integer(TimeStr, 16)) of
                                 TimeStamp when CurrentTime < TimeStamp + Timeout ->
@@ -738,6 +739,7 @@ max_age() ->
             Timeout = chttpd_util:get_chttpd_auth_config_integer(
                 "timeout", 600
             ),
+            io:format("+++ ~p/~p()@~B -> chttpd_auth Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
             [{max_age, Timeout}]
     end.
 

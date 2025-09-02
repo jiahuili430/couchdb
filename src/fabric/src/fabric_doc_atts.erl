@@ -46,6 +46,7 @@ receiver_callback(Middleman, Length) when is_integer(Length) ->
     fun() ->
         Middleman ! {self(), gimme_data},
         Timeout = fabric_util:attachments_timeout(),
+        io:format("+++ ~p/~p()@~B -> attachments_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
         receive
             {Middleman, Data} ->
                 rexi:reply(attachment_chunk_received),
@@ -75,6 +76,7 @@ maybe_send_continue(#httpd{mochi_req = MochiReq} = Req) ->
 write_chunks(MiddleMan, ChunkFun, State) ->
     MiddleMan ! {self(), gimme_data},
     Timeout = fabric_util:attachments_timeout(),
+    io:format("+++ ~p/~p()@~B -> attachments_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     receive
         {MiddleMan, ChunkRecordList} ->
             rexi:reply(attachment_chunk_received),
@@ -119,11 +121,13 @@ middleman(Req, DbName, chunked) ->
     % take requests from the DB writers and get data from the receiver
     N = mem3:n(DbName),
     Timeout = fabric_util:attachments_timeout(),
+    io:format("+++ ~p/~p()@~B -> attachments_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     middleman_loop(Receiver, N, [], [], Timeout);
 middleman(Req, DbName, Length) ->
     Receiver = spawn(fun() -> receive_unchunked_attachment(Req, Length) end),
     N = mem3:n(DbName),
     Timeout = fabric_util:attachments_timeout(),
+    io:format("+++ ~p/~p()@~B -> attachments_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     middleman_loop(Receiver, N, [], [], Timeout).
 
 middleman_loop(Receiver, N, Counters0, ChunkList0, Timeout) ->

@@ -39,6 +39,7 @@ go(DbName, Feed, Options, Callback, Acc0) when
         ok ->
             {ok, Acc} = Callback(start, Acc0),
             {Timeout, _} = couch_changes:get_changes_timeout(Args, Callback),
+            io:format("+++ ~p/~p()@~B -> couch_changes:get_changes_timeout() Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
             Ref = make_ref(),
             Parent = self(),
             ClientReq = chttpd_util:mochiweb_client_req_get(),
@@ -546,6 +547,7 @@ get_db_uuid_shards(DbName) ->
     % another fabric call and there is a good chance we'd pollute the mailbox
     % with returned messages
     Timeout = fabric_util:request_timeout(),
+    io:format("+++ ~p/~p()@~B -> request_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     IsolatedFun = fun() -> fabric:db_uuids(DbName) end,
     try fabric_util:isolate(IsolatedFun, Timeout) of
         {ok, Uuids} ->

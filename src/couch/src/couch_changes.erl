@@ -98,6 +98,7 @@ handle_db_changes(Args0, Req, Db0) ->
                 {Db, StartSeq} = Start(),
                 UserAcc2 = start_sending_changes(Callback, UserAcc, Feed),
                 {Timeout, TimeoutFun} = get_changes_timeout(Args, Callback),
+                io:format("+++ ~p/~p()@~B -> get_changes_timeout() -> Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
                 Acc0 = build_acc(
                     Args,
                     Callback,
@@ -125,6 +126,7 @@ handle_db_changes(Args0, Req, Db0) ->
                 {Callback, UserAcc} = get_callback_acc(CallbackAcc),
                 UserAcc2 = start_sending_changes(Callback, UserAcc, Feed),
                 {Timeout, TimeoutFun} = get_changes_timeout(Args, Callback),
+                io:format("+++ ~p/~p()@~B -> get_changes_timeout() -> Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
                 {Db, StartSeq} = Start(),
                 Acc0 = build_acc(
                     Args#changes_args{feed = "normal"},
@@ -432,6 +434,8 @@ get_changes_timeout(Args, Callback) ->
     DefaultTimeout = chttpd_util:get_chttpd_config_integer(
         "changes_timeout", 60000
     ),
+    io:format("+++ ~p/~p()@~B -> changes_args Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
+    io:format("+++ ~p/~p()@~B -> changes_timeout DefaultTimeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, DefaultTimeout]),
     case Heartbeat of
         undefined ->
             case Timeout of

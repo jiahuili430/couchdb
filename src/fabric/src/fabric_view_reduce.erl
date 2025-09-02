@@ -92,6 +92,8 @@ go2(DbName, Workers, {red, {_, Lang, View}, _} = VInfo, Args, Callback, Acc0) ->
                 false -> nil
             end
     },
+    io:format("+++ ~p/~p()@~B -> view_timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, fabric_util:view_timeout(Args)]),
+    io:format("+++ ~p/~p()@~B -> view_permsg_timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, fabric_util:timeout("view_permsg", "3600000")]),
     try
         rexi_utils:recv(
             Workers,

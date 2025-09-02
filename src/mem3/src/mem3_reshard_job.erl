@@ -297,6 +297,7 @@ handle_exit(
     Reason
 ) ->
     Timeout = update_shard_map_timeout_sec(),
+    io:format("+++ ~p/~p()@~B -> reshard:update_shard_map_timeout_sec Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     Msg1 = "~p job exit ~s ~p  while shard map is updating, waiting ~p sec",
     couch_log:warning(Msg1, [?MODULE, jobfmt(Job), Reason, Timeout]),
     receive
@@ -408,6 +409,7 @@ topoff_impl(#job{source = #shard{} = Source, target = Targets}) ->
     check_source_exists(Source, topoff),
     check_targets_exist(Targets, topoff),
     Timeout = config:get_integer("rexi", "shard_split_timeout_msec", ?DEFAULT_REXI_TIMEOUT),
+    io:format("+++ ~p/~p()@~B -> shard_split_timeout_msec Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     BatchSize = config:get_integer(
         "rexi", "shard_split_topoff_batch_size", ?INTERNAL_REP_BATCH_SIZE
     ),
@@ -475,6 +477,7 @@ wait_source_close(#job{source = #shard{name = Name}} = Job) ->
 
 wait_source_close_impl(#job{source = #shard{name = Name}, target = Targets}) ->
     Timeout = config:get_integer("reshard", "source_close_timeout_sec", 600),
+    io:format("+++ ~p/~p()@~B -> reshard:source_close_timeout_sec Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     check_targets_exist(Targets, wait_source_close),
     case couch_db:open_int(Name, [?ADMIN_CTX]) of
         {ok, Db} ->

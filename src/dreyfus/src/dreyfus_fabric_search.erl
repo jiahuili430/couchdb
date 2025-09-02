@@ -115,6 +115,8 @@ go(DbName, DDoc, IndexName, QueryArgs, Counters, Bookmark, RingOpts) ->
     ClientReq = chttpd_util:mochiweb_client_req_get(),
     fabric_streams:spawn_worker_cleaner(self(), Workers, ClientReq),
     RexiMon = fabric_util:create_monitors(Workers),
+    io:format("+++ ~p/~p()@~B -> search_timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, fabric_util:timeout("search", "infinity")]),
+    io:format("+++ ~p/~p()@~B -> search_permsg_timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, fabric_util:timeout("search_permsg", "3600000")]),
     try
         rexi_utils:recv(
             Workers,

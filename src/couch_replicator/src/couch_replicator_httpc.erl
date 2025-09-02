@@ -123,6 +123,7 @@ send_ibrowse_req(#httpdb{headers = BaseHeaders} = HttpDb0, Params) ->
                     Milliseconds -> list_to_integer(Milliseconds)
                 end
     end,
+    io:format("+++ ~p/~p()@~B -> replicator:request_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     {ok, Worker} = couch_replicator_httpc_pool:get_worker(HttpDb#httpdb.httpc_pool),
     BasicAuthOpts =
         case couch_replicator_utils:get_basic_auth_creds(HttpDb) of

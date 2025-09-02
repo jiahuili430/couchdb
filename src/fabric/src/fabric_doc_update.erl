@@ -51,6 +51,7 @@ go(DbName, AllDocs0, Opts) ->
         reply = dict:new()
     },
     Timeout = fabric_util:request_timeout(),
+    io:format("+++ ~p/~p()@~B -> fabric:request_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     try rexi_utils:recv(Workers, #shard.ref, fun handle_message/3, Acc0, infinity, Timeout) of
         {ok, {Health, Results}} when
             Health =:= ok; Health =:= accepted; Health =:= error

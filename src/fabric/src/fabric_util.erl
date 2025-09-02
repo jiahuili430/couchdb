@@ -124,9 +124,13 @@ get_db(DbName, Options) ->
     Live = [S || #shard{node = N} = S <- Shards, lists:member(N, Nodes)],
     % Only accept factors > 1, otherwise our math breaks further down
     Factor = max(2, config:get_integer("fabric", "shard_timeout_factor", 2)),
+    io:format("+++ ~p/~p()@~B -> shard_timeout_factor Factor: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Factor]),
     MinTimeout = config:get_integer("fabric", "shard_timeout_min_msec", 100),
+    io:format("+++ ~p/~p()@~B -> shard_timeout_min_msec MinTimeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, MinTimeout]),
     MaxTimeout = request_timeout(),
+    io:format("+++ ~p/~p()@~B -> request_timeout MaxTimeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, MaxTimeout]),
     Timeout = get_db_timeout(length(Live), Factor, MinTimeout, MaxTimeout),
+    io:format("+++ fabric_util/get_db() -> calculated get_shard() Timeout: ~p~n", [Timeout]),
     get_shard(Live, Options, Timeout, Factor).
 
 get_shard([], _Opts, _Timeout, _Factor) ->

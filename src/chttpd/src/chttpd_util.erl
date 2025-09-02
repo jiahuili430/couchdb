@@ -115,6 +115,7 @@ handle_legacy_config(OriginalHeaders, DefaultHeaderValue) ->
 
 get_db_info(DbName) ->
     Timeout = fabric_util:request_timeout(),
+    io:format("+++ ~p/~p()@~B -> fabric:request_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     IsolatedFun = fun() -> fabric:get_db_info(DbName) end,
     try
         fabric_util:isolate(IsolatedFun, Timeout)

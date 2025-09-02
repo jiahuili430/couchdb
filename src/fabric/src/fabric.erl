@@ -458,6 +458,7 @@ all_docs(DbName, Callback, Acc, QueryArgs) ->
 all_docs(DbName, Options, Callback, Acc0, #mrargs{} = QueryArgs0) when
     is_function(Callback, 2)
 ->
+    couch_log:error("+++++++ ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     QueryArgs = fabric_util:validate_all_docs_args(DbName, QueryArgs0),
     fabric_view_all_docs:go(dbname(DbName), opts(Options), QueryArgs, Callback, Acc0);
 %% @doc convenience function that takes a keylist rather than a record

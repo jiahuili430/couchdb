@@ -126,6 +126,7 @@ mp_parse_atts(eof, {Ref, Chunks, Offset, Counters, Waiting}) ->
                             mp_parse_atts(eof, NewAcc)
                     end
             after att_writer_timeout() ->
+                io:format("+++ ~p/~p()@~B -> attachment_writer_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, att_writer_timeout()]),
                 ok
             end
     end.
@@ -208,6 +209,7 @@ maybe_send_data({Ref, Chunks, Offset, Counters, Waiting}) ->
                         C2 = update_writer(X, Counters),
                         maybe_send_data({Ref, NewChunks, NewOffset, C2, [X | NewWaiting]})
                 after att_writer_timeout() ->
+                    io:format("+++ ~p/~p()@~B -> attachment_writer_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, att_writer_timeout()]),
                     abort_parsing
                 end
         end

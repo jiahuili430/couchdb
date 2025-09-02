@@ -22,6 +22,7 @@
 -include_lib("couch_mrview/include/couch_mrview.hrl").
 
 go(Db, Options, #mrargs{keys = undefined} = QueryArgs, Callback, Acc) ->
+    couch_log:error("+++++++ ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     {CoordArgs, WorkerArgs} = fabric_view:fix_skip_and_limit(QueryArgs),
     DbName = fabric:dbname(Db),
     {Shards, RingOpts} = shards(Db, QueryArgs),
@@ -47,6 +48,7 @@ go(Db, Options, #mrargs{keys = undefined} = QueryArgs, Callback, Acc) ->
         rexi_monitor:stop(RexiMon)
     end;
 go(DbName, Options, QueryArgs, Callback, Acc0) ->
+    couch_log:error("+++++++ ~p:~p@~B", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     #mrargs{
         direction = Dir,
         include_docs = IncludeDocs,
@@ -93,6 +95,7 @@ go(DbName, Options, QueryArgs, Callback, Acc0) ->
         end,
     Keys4 = filter_keys_by_namespace(Keys3, Namespace),
     Timeout = fabric_util:all_docs_timeout(),
+    io:format("+++ ~p/~p()@~B -> all_docs_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     {_, Ref} = spawn_monitor(fun() ->
         exit(fabric:get_doc_count(DbName, Namespace))
     end),
@@ -137,6 +140,8 @@ go(DbName, _Options, Workers, QueryArgs, Callback, Acc0) ->
                 false -> nil
             end
     },
+    io:format("+++ ~p/~p()@~B -> view_timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, fabric_util:view_timeout(QueryArgs)]),
+    io:format("+++ ~p/~p()@~B -> all_docs_permsg_timeout: 5000~n", [?MODULE, ?FUNCTION_NAME, ?LINE]),
     case
         rexi_utils:recv(
             Workers,
@@ -306,6 +311,7 @@ doc_receive_loop(Keys, Pids, SpawnFun, MaxJobs, Callback, AccIn) ->
         _ ->
             {{value, {Pid, Ref}}, RestPids} = queue:out(Pids),
             Timeout = fabric_util:all_docs_timeout(),
+            io:format("+++ ~p/~p()@~B -> all_docs_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
             Receive = fun(Row) ->
                 case Callback(fabric_view_row:transform(Row), AccIn) of
                     {ok, Acc} ->

@@ -38,6 +38,7 @@ send(Dest, Msg) ->
 recv(Refs, Keypos, Fun, Acc0, infinity, PerMsgTO) ->
     process_mailbox(Refs, Keypos, Fun, Acc0, nil, PerMsgTO);
 recv(Refs, Keypos, Fun, Acc0, GlobalTimeout, PerMsgTO) ->
+    io:format("+++ ~p/~p()@~B -> fabric:request_timeout GlobalTimeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, GlobalTimeout]),
     TimeoutRef = erlang:make_ref(),
     TRef = erlang:send_after(GlobalTimeout, self(), {timeout, TimeoutRef}),
     try

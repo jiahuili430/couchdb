@@ -80,6 +80,7 @@ get_proc(#doc{body = {Props}} = DDoc, DbKey, {_DDocId, _Rev} = DDocKey) ->
     Lang = couch_util:to_binary(LangStr),
     Client = #client{lang = Lang, ddoc = DDoc, db_key = DbKey, ddoc_key = DDocKey},
     Timeout = get_os_process_timeout(),
+    io:format("+++ ~p/~p()@~B -> os_process_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     Res = gen_server:call(?MODULE, {get_proc, Client}, Timeout),
     couch_stats:increment_counter([couchdb, query_server, acquired_processes]),
     Res.
@@ -88,6 +89,7 @@ get_proc(LangStr) ->
     Lang = couch_util:to_binary(LangStr),
     Client = #client{lang = Lang},
     Timeout = get_os_process_timeout(),
+    io:format("+++ ~p/~p()@~B -> os_process_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     Res = gen_server:call(?MODULE, {get_proc, Client}, Timeout),
     couch_stats:increment_counter([couchdb, query_server, acquired_processes]),
     Res.
@@ -732,6 +734,7 @@ remove_waiting_client(#client{wait_key = Key}) ->
 get_proc_config() ->
     Limit = config:get_boolean("query_server_config", "reduce_limit", true),
     Timeout = get_os_process_timeout(),
+    io:format("+++ ~p/~p()@~B -> os_process_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     {[
         {<<"reduce_limit">>, Limit},
         {<<"timeout">>, Timeout}

@@ -855,6 +855,7 @@ teach_ddoc(#proc{} = Proc, DDocId, DDoc) ->
 
 proc_reset(#proc{} = Proc) ->
     Timeout = config:get_integer("couchdb", "os_process_timeout", 5000),
+    io:format("+++ ~p/~p()@~B -> os_process_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     Cfg = [{<<"timeout">>, Timeout}],
     Result = prompt(Proc, [<<"reset">>, {Cfg}]),
     proc_set_timeout(Proc, Timeout),

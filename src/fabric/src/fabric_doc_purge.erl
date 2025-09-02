@@ -61,6 +61,7 @@ go(DbName, IdsRevs, Options) ->
 
     RexiMon = fabric_util:create_monitors(Workers),
     Timeout = fabric_util:request_timeout(),
+    io:format("+++ ~p/~p()@~B -> fabric:request_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     Acc0 = #acc{
         worker_uuids = WorkerUUIDs,
         resps = dict:from_list([{UUID, []} || UUID <- UUIDs]),

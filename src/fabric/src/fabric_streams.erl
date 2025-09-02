@@ -73,6 +73,7 @@ start(Workers0, Keypos, StartFun, Replacements, RingOpts) ->
     ClientReq = chttpd_util:mochiweb_client_req_get(),
     spawn_worker_cleaner(self(), Workers0, ClientReq),
     Timeout = fabric_util:request_timeout(),
+    io:format("+++ ~p/~p()@~B -> request_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     case rexi_utils:recv(Workers0, Keypos, Fun, Acc, Timeout, infinity) of
         {ok, #stream_acc{ready = Workers}} ->
             AckedWorkers = fabric_dict:fold(

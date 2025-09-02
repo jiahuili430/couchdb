@@ -438,6 +438,7 @@ commit_delay() ->
 
 group_info_timeout_msec() ->
     Timeout = config:get("query_server_config", "group_info_timeout", "5000"),
+    io:format("+++ ~p/~p()@~B -> query_server_config:group_info_timeout Timeout: ~p~n", [?MODULE, ?FUNCTION_NAME, ?LINE, Timeout]),
     case Timeout of
         "infinity" ->
             infinity;
