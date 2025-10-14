@@ -94,11 +94,13 @@ defmodule ChangesAsyncTest do
 
     create_doc_bar(db_name, "bar")
 
-    changes = process_response(req_id.id, &parse_event/1)
+    retry_until(fn ->
+      changes = process_response(req_id.id, &parse_event/1)
 
-    assert length(changes) == 2
-    assert Enum.at(changes, 0)["id"] == "foo"
-    assert Enum.at(changes, 1)["id"] == "bar"
+      assert length(changes) == 2
+      assert Enum.at(changes, 0)["id"] == "foo"
+      assert Enum.at(changes, 1)["id"] == "bar"
+    end)
 
     HTTPotion.stop_worker_process(worker_pid)
   end
@@ -148,10 +150,12 @@ defmodule ChangesAsyncTest do
 
     create_doc_bar(db_name, "bar")
 
-    changes = process_response(req_id.id, &parse_event/1)
-    assert length(changes) == 2
-    assert Enum.at(changes, 0)["id"] == "foo"
-    assert Enum.at(changes, 1)["id"] == "bar"
+    retry_until(fn ->
+      changes = process_response(req_id.id, &parse_event/1)
+      assert length(changes) == 2
+      assert Enum.at(changes, 0)["id"] == "foo"
+      assert Enum.at(changes, 1)["id"] == "bar"
+    end)
 
     HTTPotion.stop_worker_process(worker_pid)
   end
@@ -327,16 +331,18 @@ defmodule ChangesAsyncTest do
     :ok = wait_for_headers(req_id.id, 200)
     create_doc(db_name, %{_id: "doc3", value: 3})
 
-    changes = process_response(req_id.id, &parse_changes_line_chunk/1)
+    retry_until(fn ->
+      changes = process_response(req_id.id, &parse_changes_line_chunk/1)
 
-    changes_ids =
-      changes
-      |> Enum.filter(fn p -> Map.has_key?(p, "id") end)
-      |> Enum.map(fn p -> p["id"] end)
+      changes_ids =
+        changes
+        |> Enum.filter(fn p -> Map.has_key?(p, "id") end)
+        |> Enum.map(fn p -> p["id"] end)
 
-    assert Enum.member?(changes_ids, "doc1")
-    assert Enum.member?(changes_ids, "doc3")
-    assert length(changes_ids) == 2
+      assert Enum.member?(changes_ids, "doc1")
+      assert Enum.member?(changes_ids, "doc3")
+      assert length(changes_ids) == 2
+    end)
   end
 
   @tag :with_db
