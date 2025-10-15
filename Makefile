@@ -91,7 +91,7 @@ DIALYZE_OPTS=$(shell echo "\
 	apps=$(apps) \
 	skip_deps=$(skip_deps) \
 	" | sed -e 's/[a-z]\{1,\}= / /g')
-EXUNIT_OPTS=$(subst $(comma),$(space),$(tests))
+EXUNIT_OPTS=$(foreach test,$(subst $(comma),$(space),$(tests)),$(shell find . -name $(test)))
 
 TEST_OPTS="-c 'startup_jitter=0' -c 'default_security=admin_local' -c 'iterations=9'"
 
