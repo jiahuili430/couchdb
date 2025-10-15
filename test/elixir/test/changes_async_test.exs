@@ -333,11 +333,13 @@ defmodule ChangesAsyncTest do
 
     retry_until(fn ->
       changes = process_response(req_id.id, &parse_changes_line_chunk/1)
+    IO.inspect(changes, label: "+++ changes:")
 
       changes_ids =
         changes
         |> Enum.filter(fn p -> Map.has_key?(p, "id") end)
         |> Enum.map(fn p -> p["id"] end)
+    IO.inspect(changes_ids, label: "+++ changes_ids:")
 
       assert Enum.member?(changes_ids, "doc1")
       assert Enum.member?(changes_ids, "doc3")
@@ -403,9 +405,13 @@ defmodule ChangesAsyncTest do
   defp process_response(id, chunk_parser, timeout \\ 1000) do
     receive do
       %HTTPotion.AsyncChunk{id: ^id} = msg ->
+        IO.inspect(id, label: "+++ AsyncChunk -> id:")
+        IO.inspect(msg, label: "+++ msg before:")
+        IO.inspect(chunk_parser.(msg), label: "+++ chunk_parser.(msg):")
         chunk_parser.(msg)
 
       _ ->
+        IO.inspect(id, label: "+++ _ -> id:")
         process_response(id, chunk_parser, timeout)
     after
       timeout -> :timeout
