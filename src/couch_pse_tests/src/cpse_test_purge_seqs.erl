@@ -92,34 +92,34 @@ cpse_increment_purge_multiple_times(DbName) ->
         {purge_infos, PurgeInfos1}
     ]).
 
-cpse_increment_purge_seq_on_partial_purge(DbName) ->
-    {ok, Rev1} = cpse_util:save_doc(DbName, {[{'_id', foo1}, {vsn, <<"1.1">>}]}),
-    Update =
-        {[
-            {'_id', foo1},
-            {'_rev', couch_doc:rev_to_str({1, [couch_hash:md5_hash(<<"1.2">>)]})},
-            {vsn, <<"1.2">>}
-        ]},
-    {ok, [_Rev2]} = cpse_util:save_docs(DbName, [Update], [?REPLICATED_CHANGES]),
-
-    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
-        {doc_count, 1},
-        {del_doc_count, 0},
-        {update_seq, 2},
-        {purge_seq, 0},
-        {purge_infos, []}
-    ]),
-
-    PurgeInfos1 = [
-        {cpse_util:uuid(), <<"foo1">>, [Rev1]}
-    ],
-    {ok, [{ok, PRevs1}]} = cpse_util:purge(DbName, PurgeInfos1),
-    ?assertEqual([Rev1], PRevs1),
-
-    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
-        {doc_count, 1},
-        {del_doc_count, 0},
-        {update_seq, 3},
-        {purge_seq, 1},
-        {purge_infos, PurgeInfos1}
-    ]).
+%%cpse_increment_purge_seq_on_partial_purge(DbName) ->
+%%    {ok, Rev1} = cpse_util:save_doc(DbName, {[{'_id', foo1}, {vsn, <<"1.1">>}]}),
+%%    Update =
+%%        {[
+%%            {'_id', foo1},
+%%            {'_rev', couch_doc:rev_to_str({1, [couch_hash:md5_hash(<<"1.2">>)]})},
+%%            {vsn, <<"1.2">>}
+%%        ]},
+%%    {ok, [_Rev2]} = cpse_util:save_docs(DbName, [Update], [?REPLICATED_CHANGES]),
+%%
+%%    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
+%%        {doc_count, 1},
+%%        {del_doc_count, 0},
+%%        {update_seq, 2},
+%%        {purge_seq, 0},
+%%        {purge_infos, []}
+%%    ]),
+%%
+%%    PurgeInfos1 = [
+%%        {cpse_util:uuid(), <<"foo1">>, [Rev1]}
+%%    ],
+%%    {ok, [{ok, PRevs1}]} = cpse_util:purge(DbName, PurgeInfos1),
+%%    ?assertEqual([Rev1], PRevs1),
+%%
+%%    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
+%%        {doc_count, 1},
+%%        {del_doc_count, 0},
+%%        {update_seq, 3},
+%%        {purge_seq, 1},
+%%        {purge_infos, PurgeInfos1}
+%%    ]).

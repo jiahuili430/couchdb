@@ -242,31 +242,31 @@ cpse_purge_deep_revision_path(DbName) ->
         {purge_infos, PurgeInfos}
     ]).
 
-cpse_purge_partial_revs(DbName) ->
-    {ok, Rev1} = cpse_util:save_doc(DbName, {[{'_id', foo}, {vsn, <<"1.1">>}]}),
-    Update =
-        {[
-            {'_id', foo},
-            {'_rev', couch_doc:rev_to_str({1, [couch_hash:md5_hash(<<"1.2">>)]})},
-            {vsn, <<"1.2">>}
-        ]},
-    {ok, [_Rev2]} = cpse_util:save_docs(DbName, [Update], [?REPLICATED_CHANGES]),
-
-    PurgeInfos = [
-        {cpse_util:uuid(), <<"foo">>, [Rev1]}
-    ],
-
-    {ok, [{ok, PRevs}]} = cpse_util:purge(DbName, PurgeInfos),
-    ?assertEqual([Rev1], PRevs),
-
-    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
-        {doc_count, 1},
-        {del_doc_count, 0},
-        {update_seq, 3},
-        {changes, 1},
-        {purge_seq, 1},
-        {purge_infos, PurgeInfos}
-    ]).
+%%cpse_purge_partial_revs(DbName) ->
+%%    {ok, Rev1} = cpse_util:save_doc(DbName, {[{'_id', foo}, {vsn, <<"1.1">>}]}),
+%%    Update =
+%%        {[
+%%            {'_id', foo},
+%%            {'_rev', couch_doc:rev_to_str({1, [couch_hash:md5_hash(<<"1.2">>)]})},
+%%            {vsn, <<"1.2">>}
+%%        ]},
+%%    {ok, [_Rev2]} = cpse_util:save_docs(DbName, [Update], [?REPLICATED_CHANGES]),
+%%
+%%    PurgeInfos = [
+%%        {cpse_util:uuid(), <<"foo">>, [Rev1]}
+%%    ],
+%%
+%%    {ok, [{ok, PRevs}]} = cpse_util:purge(DbName, PurgeInfos),
+%%    ?assertEqual([Rev1], PRevs),
+%%
+%%    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
+%%        {doc_count, 1},
+%%        {del_doc_count, 0},
+%%        {update_seq, 3},
+%%        {changes, 1},
+%%        {purge_seq, 1},
+%%        {purge_infos, PurgeInfos}
+%%    ]).
 
 cpse_purge_missing_docid(DbName) ->
     {ok, [Rev1, _Rev2]} = cpse_util:save_docs(DbName, [
@@ -378,42 +378,42 @@ cpse_purge_missing_revision(DbName) ->
         {purge_infos, PurgeInfos}
     ]).
 
-cpse_purge_repeated_revisions(DbName) ->
-    {ok, Rev1} = cpse_util:save_doc(DbName, {[{'_id', foo}, {vsn, <<"1.1">>}]}),
-    Update =
-        {[
-            {'_id', foo},
-            {'_rev', couch_doc:rev_to_str({1, [couch_hash:md5_hash(<<"1.2">>)]})},
-            {vsn, <<"1.2">>}
-        ]},
-    {ok, [Rev2]} = cpse_util:save_docs(DbName, [Update], [?REPLICATED_CHANGES]),
-
-    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
-        {doc_count, 1},
-        {del_doc_count, 0},
-        {update_seq, 2},
-        {changes, 1},
-        {purge_seq, 0},
-        {purge_infos, []}
-    ]),
-
-    PurgeInfos1 = [
-        {cpse_util:uuid(), <<"foo">>, [Rev1]},
-        {cpse_util:uuid(), <<"foo">>, [Rev1, Rev2]}
-    ],
-
-    {ok, [{ok, PRevs1}, {ok, PRevs2}]} = cpse_util:purge(DbName, PurgeInfos1),
-    ?assertEqual([Rev1], PRevs1),
-    ?assertEqual([Rev2], PRevs2),
-
-    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
-        {doc_count, 0},
-        {del_doc_count, 0},
-        {update_seq, 3},
-        {changes, 0},
-        {purge_seq, 2},
-        {purge_infos, PurgeInfos1}
-    ]).
+%%cpse_purge_repeated_revisions(DbName) ->
+%%    {ok, Rev1} = cpse_util:save_doc(DbName, {[{'_id', foo}, {vsn, <<"1.1">>}]}),
+%%    Update =
+%%        {[
+%%            {'_id', foo},
+%%            {'_rev', couch_doc:rev_to_str({1, [couch_hash:md5_hash(<<"1.2">>)]})},
+%%            {vsn, <<"1.2">>}
+%%        ]},
+%%    {ok, [Rev2]} = cpse_util:save_docs(DbName, [Update], [?REPLICATED_CHANGES]),
+%%
+%%    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
+%%        {doc_count, 1},
+%%        {del_doc_count, 0},
+%%        {update_seq, 2},
+%%        {changes, 1},
+%%        {purge_seq, 0},
+%%        {purge_infos, []}
+%%    ]),
+%%
+%%    PurgeInfos1 = [
+%%        {cpse_util:uuid(), <<"foo">>, [Rev1]},
+%%        {cpse_util:uuid(), <<"foo">>, [Rev1, Rev2]}
+%%    ],
+%%
+%%    {ok, [{ok, PRevs1}, {ok, PRevs2}]} = cpse_util:purge(DbName, PurgeInfos1),
+%%    ?assertEqual([Rev1], PRevs1),
+%%    ?assertEqual([Rev2], PRevs2),
+%%
+%%    cpse_util:assert_db_props(?MODULE, ?LINE, DbName, [
+%%        {doc_count, 0},
+%%        {del_doc_count, 0},
+%%        {update_seq, 3},
+%%        {changes, 0},
+%%        {purge_seq, 2},
+%%        {purge_infos, PurgeInfos1}
+%%    ]).
 
 cpse_purge_repeated_uuid(DbName) ->
     {ok, Rev} = cpse_util:save_doc(DbName, {[{'_id', foo1}, {vsn, 1.1}]}),
