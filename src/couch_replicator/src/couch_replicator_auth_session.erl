@@ -313,12 +313,16 @@ http_request(#state{httpdb_pool = Pool} = State, Url, Headers, Method, Body) ->
     Timeout = State#state.httpdb_timeout,
 
     % Apply DNS override using connect_to ibrowse option
-    ParsedUrl = ibrowse_lib:parse_url(Url),
-    % #url.host
-    Host = element(3, ParsedUrl),
-    % #url.protocol
-    Proto = element(2, ParsedUrl),
-    {TargetHost, OriginalHost} = couch_replicator_dns:resolve_host(Host),
+    {TargetHost, OriginalHost, Proto} =
+        case ibrowse_lib:parse_url(Url) of
+            {error, _} ->
+                {undefined, undefined, undefined};
+            ParsedUrl ->
+                Host = element(3, ParsedUrl),
+                ProtoVal = element(2, ParsedUrl),
+                {THost, OHost} = couch_replicator_dns:resolve_host(Host),
+                {THost, OHost, ProtoVal}
+        end,
 
     Opts0 = [
         {response_format, binary},
