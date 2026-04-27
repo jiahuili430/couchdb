@@ -114,7 +114,7 @@ send_ibrowse_req(#httpdb{headers = BaseHeaders} = HttpDb0, Params) ->
     {Headers2, HttpDb} = couch_replicator_auth:update_headers(HttpDb0, Headers1),
     Url = full_url(HttpDb, Params),
     Body = get_value(body, Params, []),
-    
+
     % Apply DNS override using connect_to ibrowse option
     #url{host = Host, protocol = Protocol} = ibrowse_lib:parse_url(Url),
     {TargetHost, OriginalHost} = couch_replicator_dns:resolve_host(Host),
@@ -147,25 +147,27 @@ send_ibrowse_req(#httpdb{headers = BaseHeaders} = HttpDb0, Params) ->
                     HttpDb#httpdb.ibrowse_options
                 )
             ],
-    
+
     % Add connect_to ibrowse option if DNS override is active
-    IbrowseOptions1 = case OriginalHost of
-        undefined ->
-            IbrowseOptions0;
-        _ ->
-            % Log DNS override for debugging
-            couch_log:debug("DNS override: ~s -> ~s", [OriginalHost, TargetHost]),
-            [{connect_to, TargetHost} | IbrowseOptions0]
-    end,
-    
+    IbrowseOptions1 =
+        case OriginalHost of
+            undefined ->
+                IbrowseOptions0;
+            _ ->
+                % Log DNS override for debugging
+                couch_log:debug("DNS override: ~s -> ~s", [OriginalHost, TargetHost]),
+                [{connect_to, TargetHost} | IbrowseOptions0]
+        end,
+
     % Add SNI for HTTPS with DNS override
-    IbrowseOptions = case {Protocol, OriginalHost} of
-        {https, OrigHost} when is_list(OrigHost) ->
-            add_sni_option(IbrowseOptions1, OrigHost);
-        _ ->
-            IbrowseOptions1
-    end,
-    
+    IbrowseOptions =
+        case {Protocol, OriginalHost} of
+            {https, OrigHost} when is_list(OrigHost) ->
+                add_sni_option(IbrowseOptions1, OrigHost);
+            _ ->
+                IbrowseOptions1
+        end,
+
     backoff_before_request(Worker, HttpDb, Params),
     Response = ibrowse:send_req_direct(
         Worker, Url, Headers2, Method, Body, IbrowseOptions, Timeout
@@ -562,8 +564,10 @@ merge_headers(Headers1, Headers2) when is_list(Headers1), is_list(Headers2) ->
 %% @private Add SNI to SSL options
 add_sni_option(IbrowseOpts, Host) ->
     SslOpts = proplists:get_value(ssl_options, IbrowseOpts, []),
-    SslOpts1 = [{server_name_indication, Host} | 
-                proplists:delete(server_name_indication, SslOpts)],
+    SslOpts1 = [
+        {server_name_indication, Host}
+        | proplists:delete(server_name_indication, SslOpts)
+    ],
     lists:keystore(ssl_options, 1, IbrowseOpts, {ssl_options, SslOpts1}).
 
 -ifdef(TEST).

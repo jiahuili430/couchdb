@@ -311,36 +311,40 @@ refresh(#state{session_url = Url, user = User, pass = Pass} = State) ->
     {ok, string(), headers(), binary()} | {error, term()}.
 http_request(#state{httpdb_pool = Pool} = State, Url, Headers, Method, Body) ->
     Timeout = State#state.httpdb_timeout,
-    
+
     % Apply DNS override using connect_to ibrowse option
     ParsedUrl = ibrowse_lib:parse_url(Url),
-    Host = element(3, ParsedUrl),  % #url.host
-    Proto = element(2, ParsedUrl),  % #url.protocol
+    % #url.host
+    Host = element(3, ParsedUrl),
+    % #url.protocol
+    Proto = element(2, ParsedUrl),
     {TargetHost, OriginalHost} = couch_replicator_dns:resolve_host(Host),
-    
+
     Opts0 = [
         {response_format, binary},
         {inactivity_timeout, Timeout}
         | State#state.httpdb_ibrowse_options
     ],
-    
+
     % Add connect_to ibrowse option if DNS override is active
-    Opts1 = case OriginalHost of
-        undefined ->
-            Opts0;
-        _ ->
-            couch_log:debug("DNS override for session: ~s -> ~s", [OriginalHost, TargetHost]),
-            [{connect_to, TargetHost} | Opts0]
-    end,
-    
+    Opts1 =
+        case OriginalHost of
+            undefined ->
+                Opts0;
+            _ ->
+                couch_log:debug("DNS override for session: ~s -> ~s", [OriginalHost, TargetHost]),
+                [{connect_to, TargetHost} | Opts0]
+        end,
+
     % Add SNI for HTTPS with DNS override
-    Opts = case {Proto, OriginalHost} of
-        {https, OrigHost} when is_list(OrigHost) ->
-            couch_replicator_httpc:add_sni_option(Opts1, OrigHost);
-        _ ->
-            Opts1
-    end,
-    
+    Opts =
+        case {Proto, OriginalHost} of
+            {https, OrigHost} when is_list(OrigHost) ->
+                couch_replicator_httpc:add_sni_option(Opts1, OrigHost);
+            _ ->
+                Opts1
+        end,
+
     {ok, Wrk} = couch_replicator_httpc_pool:get_worker(Pool),
     try
         Result = ibrowse:send_req_direct(

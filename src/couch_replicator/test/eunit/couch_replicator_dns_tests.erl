@@ -16,50 +16,67 @@
 
 match_pattern_test_() ->
     [
-        ?_assert(couch_replicator_dns:match_pattern(
-            "account.example.test", "*.example.test")),
-        ?_assertNot(couch_replicator_dns:match_pattern(
-            "example.test", "*.example.test")),
-        ?_assert(couch_replicator_dns:match_pattern(
-            "exact.example.test", "exact.example.test")),
-        ?_assertNot(couch_replicator_dns:match_pattern(
-            "other.example.test", "exact.example.test")),
-        ?_assertNot(couch_replicator_dns:match_pattern(
-            "short", "*.verylongpattern.example.test"))
+        ?_assert(
+            couch_replicator_dns:match_pattern(
+                "account.example.test", "*.example.test"
+            )
+        ),
+        ?_assertNot(
+            couch_replicator_dns:match_pattern(
+                "example.test", "*.example.test"
+            )
+        ),
+        ?_assert(
+            couch_replicator_dns:match_pattern(
+                "exact.example.test", "exact.example.test"
+            )
+        ),
+        ?_assertNot(
+            couch_replicator_dns:match_pattern(
+                "other.example.test", "exact.example.test"
+            )
+        ),
+        ?_assertNot(
+            couch_replicator_dns:match_pattern(
+                "short", "*.verylongpattern.example.test"
+            )
+        )
     ].
 
 parse_config_test_() ->
     [
         ?_assertEqual(
             2,
-            length(couch_replicator_dns:parse_config(
-                "*.example.test:proxy.internal, exact.example.test:127.0.0.1"
-            ))
+            length(
+                couch_replicator_dns:parse_config(
+                    "*.example.test:proxy.internal, exact.example.test:127.0.0.1"
+                )
+            )
         ),
         ?_assertEqual([], couch_replicator_dns:parse_config(""))
     ].
 
 resolve_host_test_() ->
     {setup,
-     fun() ->
-         meck:new(config, [passthrough]),
-         meck:expect(config, get, fun
-             ("replicator", "dns_overrides", _) ->
-                 "*.example.test:egress.internal";
-             (_, _, Default) ->
-                 Default
-         end)
-     end,
-     fun(_) ->
-         meck:unload(config)
-     end,
-     [
-         ?_assertEqual(
-             {"egress.internal", "account.example.test"},
-             couch_replicator_dns:resolve_host("account.example.test")
-         ),
-         ?_assertEqual(
-             {"other.example.org", undefined},
-             couch_replicator_dns:resolve_host("other.example.org")
-         )
-     ]}.
+        fun() ->
+            meck:new(config, [passthrough]),
+            meck:expect(config, get, fun
+                ("replicator", "dns_overrides", _) ->
+                    "*.example.test:egress.internal";
+                (_, _, Default) ->
+                    Default
+            end)
+        end,
+        fun(_) ->
+            meck:unload(config)
+        end,
+        [
+            ?_assertEqual(
+                {"egress.internal", "account.example.test"},
+                couch_replicator_dns:resolve_host("account.example.test")
+            ),
+            ?_assertEqual(
+                {"other.example.org", undefined},
+                couch_replicator_dns:resolve_host("other.example.org")
+            )
+        ]}.
