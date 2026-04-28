@@ -23,8 +23,12 @@
 
 -spec resolve_host(string()) -> {string(), string() | undefined}.
 resolve_host(Host) ->
+    io:format("~n +++++++ Host:~p <- ~p:~p@~B", [Host, ?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n +++++++ unicode:characters_to_binary(Host):~p <- ~p:~p@~B", [unicode:characters_to_binary(Host), ?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n +++++++ get_overrides():~p <- ~p:~p@~B", [get_overrides(), ?MODULE, ?FUNCTION_NAME, ?LINE]),
     case find_override(unicode:characters_to_binary(Host), get_overrides()) of
         {ok, Target} ->
+            io:format("~n +++++++ Target:~p <- ~p:~p@~B", [Target, ?MODULE, ?FUNCTION_NAME, ?LINE]),
             {binary_to_list(Target), Host};
         not_found ->
             {Host, undefined}
@@ -36,6 +40,7 @@ get_overrides() ->
         undefined ->
             [];
         ConfigStr ->
+            io:format("~n +++++++ ConfigStr:~p <- ~p:~p@~B", [ConfigStr, ?MODULE, ?FUNCTION_NAME, ?LINE]),
             parse_config(ConfigStr)
     end.
 
@@ -44,12 +49,14 @@ parse_config(ConfigStr) ->
     Entries = binary:split(
         unicode:characters_to_binary(ConfigStr), <<",">>, [global, trim]
     ),
+    io:format("~n +++++++ Entries:~p <- ~p:~p@~B", [Entries, ?MODULE, ?FUNCTION_NAME, ?LINE]),
     lists:filtermap(fun parse_entry/1, Entries).
 
 parse_entry(<<>>) ->
     false;
 parse_entry(Entry0) ->
     Entry = string:trim(Entry0),
+    io:format("~n +++++++ Entry:~p <- ~p:~p@~B", [Entry, ?MODULE, ?FUNCTION_NAME, ?LINE]),
     case binary:split(Entry, <<":">>) of
         [Pattern0, Target0] ->
             Pattern = string:trim(Pattern0),
@@ -79,16 +86,30 @@ find_override(Host, [{Pattern, Target} | Rest]) ->
 
 -spec match_pattern(binary() | string(), binary() | string()) -> boolean().
 match_pattern(Host0, Pattern0) ->
+    io:format("~n +++++++ Host0:~p <- ~p:~p@~B", [Host0, ?MODULE, ?FUNCTION_NAME, ?LINE]),
     Host = unicode:characters_to_binary(Host0),
+    io:format("~n +++++++ Host:~p <- ~p:~p@~B", [Host, ?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n +++++++ Pattern0:~p <- ~p:~p@~B", [Pattern0, ?MODULE, ?FUNCTION_NAME, ?LINE]),
     Pattern = unicode:characters_to_binary(Pattern0),
+    io:format("~n +++++++ Pattern:~p <- ~p:~p@~B", [Pattern, ?MODULE, ?FUNCTION_NAME, ?LINE]),
     match_pattern_binary(Host, Pattern).
 
 match_pattern_binary(Host, <<"*", Suffix/binary>>) ->
     % wildcard match: extract last N bytes from Host and compare to Suffix
     % size check prevents binary:part crash when Host is shorter than Suffix
+    io:format("~n +++++++ Host:~p <- ~p:~p@~B", [Host, ?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n +++++++ Suffix:~p <- ~p:~p@~B", [Suffix, ?MODULE, ?FUNCTION_NAME, ?LINE]),
     HostSize = byte_size(Host),
     SuffixSize = byte_size(Suffix),
+    io:format("~n +++++++ HostSize:~p <- ~p:~p@~B", [HostSize, ?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n +++++++ SuffixSize:~p <- ~p:~p@~B", [SuffixSize, ?MODULE, ?FUNCTION_NAME, ?LINE]),
+
+    io:format("~n +++++++ HostSize - SuffixSize:~p <- ~p:~p@~B", [HostSize - SuffixSize, ?MODULE, ?FUNCTION_NAME, ?LINE]),
+
+    io:format("~n +++++++ binary:part(Host, HostSize - SuffixSize, SuffixSize):~p <- ~p:~p@~B", [binary:part(Host, HostSize - SuffixSize, SuffixSize), ?MODULE, ?FUNCTION_NAME, ?LINE]),
     HostSize >= SuffixSize andalso
         binary:part(Host, HostSize - SuffixSize, SuffixSize) =:= Suffix;
 match_pattern_binary(Host, Pattern) ->
+    io:format("~n +++++++ Host:~p <- ~p:~p@~B", [Host, ?MODULE, ?FUNCTION_NAME, ?LINE]),
+    io:format("~n +++++++ Pattern:~p <- ~p:~p@~B", [Pattern, ?MODULE, ?FUNCTION_NAME, ?LINE]),
     Host =:= Pattern.
