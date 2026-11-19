@@ -340,7 +340,13 @@ do_dispatch(
     #opts{concurrent = true, ignore_errors = true}
 ) ->
     spawn(fun() ->
-        (catch Handle:dispatch(Module, Function, Args))
+        try
+            Handle:dispatch(Module, Function, Args)
+        catch
+            throw:Term -> Term;
+            exit:Reason -> {'EXIT', Reason};
+            error:Reason:Stacktrace -> {'EXIT', {Reason, Stacktrace}}
+        end
     end);
 do_dispatch(
     Handle,
@@ -349,7 +355,13 @@ do_dispatch(
     Args,
     #opts{ignore_errors = true}
 ) ->
-    (catch Handle:dispatch(Module, Function, Args));
+    try
+        Handle:dispatch(Module, Function, Args)
+    catch
+        throw:Term -> Term;
+        exit:Reason -> {'EXIT', Reason};
+        error:Reason:Stacktrace -> {'EXIT', {Reason, Stacktrace}}
+    end;
 do_dispatch(
     Handle,
     Module,

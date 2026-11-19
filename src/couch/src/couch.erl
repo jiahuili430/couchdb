@@ -11,6 +11,7 @@
 % the License.
 
 -module(couch).
+-include_lib("couch/include/couch_db.hrl").
 
 -export([
     start/0,
@@ -32,7 +33,11 @@ deps() ->
     ].
 
 start() ->
-    catch erlang:system_flag(scheduler_bind_type, default_bind),
+    try
+        erlang:system_flag(scheduler_bind_type, default_bind)
+    catch
+        _:_ -> ok
+    end,
     case start_apps(deps()) of
         ok ->
             ok = application:start(couch);

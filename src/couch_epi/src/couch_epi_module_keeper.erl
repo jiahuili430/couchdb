@@ -56,7 +56,11 @@ start_link(Type, Key, Codegen) ->
     ).
 
 stop(Server) ->
-    catch gen_server:call(Server, stop).
+    try
+        gen_server:call(Server, stop)
+    catch
+        _:_ -> ok
+    end.
 
 reload(Server) ->
     gen_server:call(Server, reload).

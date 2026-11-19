@@ -714,7 +714,7 @@ db_req(#httpd{method = 'POST', path_parts = [DbName], user_ctx = Ctx} = Req, Db)
         "ok" ->
             % async_batching
             spawn(fun() ->
-                case catch (fabric:update_doc(Db, Doc2, Options)) of
+                try fabric:update_doc(Db, Doc2, Options) of
                     {ok, _} ->
                         chttpd_stats:incr_writes(),
                         ok;
@@ -723,6 +723,8 @@ db_req(#httpd{method = 'POST', path_parts = [DbName], user_ctx = Ctx} = Req, Db)
                         ok;
                     Error ->
                         couch_log:debug("Batch doc error (~s): ~p", [DocId, Error])
+                catch
+                    _:_ -> ok
                 end
             end),
 
@@ -1390,7 +1392,7 @@ db_doc_req(#httpd{method = 'PUT', user_ctx = Ctx} = Req, Db, DocId) ->
                     validate_revs(Doc, UpdateType =:= ?INTERACTIVE_EDIT),
 
                     spawn(fun() ->
-                        case catch (fabric:update_doc(Db, Doc, Options)) of
+                        try fabric:update_doc(Db, Doc, Options) of
                             {ok, _} ->
                                 chttpd_stats:incr_writes(),
                                 ok;
@@ -1399,6 +1401,8 @@ db_doc_req(#httpd{method = 'PUT', user_ctx = Ctx} = Req, Db, DocId) ->
                                 ok;
                             Error ->
                                 couch_log:notice("Batch doc error (~s): ~p", [DocId, Error])
+                        catch
+                            _:_ -> ok
                         end
                     end),
                     send_json(

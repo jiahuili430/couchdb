@@ -224,7 +224,11 @@ merge_server_options(A, B) ->
     lists:keymerge(1, lists:sort(A), lists:sort(B)).
 
 stop() ->
-    catch mochiweb_http:stop(https),
+    try
+        mochiweb_http:stop(https)
+    catch
+        _:_ -> ok
+    end,
     mochiweb_http:stop(?MODULE).
 
 handle_request(MochiReq0) ->

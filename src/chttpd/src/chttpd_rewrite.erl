@@ -367,11 +367,13 @@ format(<<"int">>, Value) when is_integer(Value) ->
 format(<<"int">>, Value) when is_binary(Value) ->
     format(<<"int">>, ?b2l(Value));
 format(<<"int">>, Value) when is_list(Value) ->
-    case (catch list_to_integer(Value)) of
+    try list_to_integer(Value) of
         IntVal when is_integer(IntVal) ->
             IntVal;
         _ ->
             Value
+    catch
+        _:_ -> Value
     end;
 format(<<"bool">>, Value) when is_binary(Value) ->
     format(<<"bool">>, ?b2l(Value));

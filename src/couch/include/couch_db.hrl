@@ -217,3 +217,16 @@
 -type user_ctx() :: #user_ctx{}.
 -type sec_props() :: [tuple()].
 -type sec_obj() :: {sec_props()}.
+
+-define(try_catch(F, A), ?try_catch(erlang, apply, [F, A])).
+-define(try_catch(M, F, A),
+    (fun() ->
+         try
+             apply(M, F, A)
+         catch
+             throw:__Term -> __Term;
+             exit:__Reason -> {'EXIT', __Reason};
+             error:__Reason:__Stacktrace -> {'EXIT', {__Reason, __Stacktrace}}
+         end
+     end)()
+).

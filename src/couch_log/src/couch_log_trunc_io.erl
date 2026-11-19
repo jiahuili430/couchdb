@@ -96,9 +96,11 @@ fprint(T, Max, Options) ->
 %%
 -spec safe(term(), pos_integer()) -> {string(), pos_integer()} | {string()}.
 safe(What, Len) ->
-    case catch print(What, Len) of
+    try couch_log_trunc_io:print(What, Len) of
         {L, Used} when is_list(L) -> {L, Used};
         _ -> {"unable to print" ++ io_lib:write(What, 99)}
+    catch
+        _:_ -> {"unable to print" ++ io_lib:write(What, 99)}
     end.
 
 %% @doc Returns {List, Length}

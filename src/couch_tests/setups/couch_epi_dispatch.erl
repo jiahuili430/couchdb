@@ -71,7 +71,11 @@ start_epi(Ctx0, Plugins) ->
 stop_epi(Ctx0, ServiceId, Plugins) ->
     ok = application:set_env(couch_epi, plugins, Plugins),
     Handle = couch_epi:get_handle(ServiceId),
-    catch couch_epi_module_keeper:reload(Handle),
+    try
+        couch_epi_module_keeper:reload(Handle)
+    catch
+        _:_ -> ok
+    end,
     Ctx1 = couch_tests:stop_applications([couch_epi], Ctx0),
     application:unload(couch_epi),
     Ctx1.
