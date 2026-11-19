@@ -496,10 +496,22 @@ do_resume(#state{active = Active} = State) ->
     State#state{paused = false}.
 
 suspend_pid(Pid) when is_pid(Pid) ->
-    catch erlang:suspend_process(Pid, [unless_suspending]).
+    try
+        erlang:suspend_process(Pid, [unless_suspending])
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 resume_pid(Pid) when is_pid(Pid) ->
-    catch erlang:resume_process(Pid).
+    try
+        erlang:resume_process(Pid)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 -ifdef(TEST).
 

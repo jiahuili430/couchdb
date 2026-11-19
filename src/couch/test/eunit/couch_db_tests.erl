@@ -197,7 +197,11 @@ locking_should_work(DbName) ->
         ),
 
         ok = couch_db:close(Db),
-        catch exit(couch_db:get_pid(Db), kill),
+        try
+            exit(couch_db:get_pid(Db), kill)
+        catch
+            _:_ -> ok
+        end,
         test_util:wait(fun() ->
             case ets:lookup(couch_server:couch_dbs(DbName), DbName) of
                 [] -> ok;

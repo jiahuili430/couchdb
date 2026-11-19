@@ -56,7 +56,13 @@ start_link(Type, Key, Codegen) ->
     ).
 
 stop(Server) ->
-    catch gen_server:call(Server, stop).
+    try
+        gen_server:call(Server, stop)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 reload(Server) ->
     gen_server:call(Server, reload).

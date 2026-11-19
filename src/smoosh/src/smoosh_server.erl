@@ -256,7 +256,11 @@ handle_info(_Msg, State) ->
     {noreply, State}.
 
 terminate(_Reason, #state{access_cleaner = CPid}) ->
-    catch unlink(CPid),
+    try
+        unlink(CPid)
+    catch
+        _:_ -> ok
+    end,
     exit(CPid, kill),
     Fun = fun(#channel{pid = P}, _) ->
         smoosh_channel:close(P)

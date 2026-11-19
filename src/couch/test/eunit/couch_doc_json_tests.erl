@@ -357,7 +357,14 @@ from_json_with_dbname_error_cases() ->
 
     lists:map(
         fun({EJson, DbName, Expect, Msg}) ->
-            Error = (catch couch_doc:from_json_obj_validate(EJson, DbName)),
+            Error =
+                try
+                    couch_doc:from_json_obj_validate(EJson, DbName)
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                    exit:Reason -> {'EXIT', Reason}
+                end,
             {Msg, ?_assertMatch(Expect, Error)}
         end,
         Cases

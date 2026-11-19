@@ -298,7 +298,14 @@ should_terminate(Pid) ->
         ?assert(is_process_alive(Pid)),
 
         EventMgr = whereis(config_event),
-        EventMgrWasAlive = (catch is_process_alive(EventMgr)),
+        EventMgrWasAlive =
+            try
+                is_process_alive(EventMgr)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                exit:Reason -> {'EXIT', Reason}
+            end,
 
         Ref = monitor(process, Pid),
 

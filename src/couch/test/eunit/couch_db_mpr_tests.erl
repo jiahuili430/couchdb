@@ -36,7 +36,11 @@ setup() ->
     Url.
 
 teardown(Url) ->
-    catch delete_db(Url),
+    try
+        delete_db(Url)
+    catch
+        _:_ -> ok
+    end,
     ok = config:delete("admins", ?USER, _Persist = false).
 
 create_db(Url) ->

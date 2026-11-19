@@ -542,19 +542,25 @@ docs(States) ->
 doc(Db, DocId) ->
     HealthThreshold = couch_replicator_scheduler:health_threshold(),
     Res =
-        (catch ets:foldl(
-            fun(RDoc, nil) ->
-                {Shard, RDocId} = RDoc#rdoc.id,
-                case {mem3:dbname(Shard), RDocId} of
-                    {Db, DocId} when RDoc#rdoc.state =/= not_owner ->
-                        throw({found, ejson_doc(RDoc, HealthThreshold)});
-                    {_OtherDb, _OtherDocId} ->
-                        nil
-                end
-            end,
-            nil,
-            ?MODULE
-        )),
+        try
+            ets:foldl(
+                fun(RDoc, nil) ->
+                    {Shard, RDocId} = RDoc#rdoc.id,
+                    case {mem3:dbname(Shard), RDocId} of
+                        {Db, DocId} when RDoc#rdoc.state =/= not_owner ->
+                            throw({found, ejson_doc(RDoc, HealthThreshold)});
+                        {_OtherDb, _OtherDocId} ->
+                            nil
+                    end
+                end,
+                nil,
+                ?MODULE
+            )
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end,
     case Res of
         {found, DocInfo} ->
             {ok, DocInfo};

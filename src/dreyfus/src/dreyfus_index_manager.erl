@@ -131,7 +131,15 @@ handle_db_event(_DbName, _Event, _St) ->
     {ok, nil}.
 
 new_index(DbName, #index{sig = Sig} = Index) ->
-    case (catch dreyfus_index:start_link(DbName, Index)) of
+    case
+        try
+            dreyfus_index:start_link(DbName, Index)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, NewPid} ->
             Msg = {open_ok, DbName, Sig, NewPid},
             ok = gen_server:call(?MODULE, Msg, infinity),

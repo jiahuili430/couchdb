@@ -52,7 +52,13 @@ setup() ->
     ?tempfile().
 
 teardown(Path) ->
-    catch file:delete(Path).
+    try
+        file:delete(Path)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+        exit:Reason -> {'EXIT', Reason}
+    end.
 
 open_raw(Path) ->
     % Use the options couch_file is using

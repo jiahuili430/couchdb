@@ -140,7 +140,15 @@ t_with_seeds(Url) ->
     config:set("cluster", "seedlist", CfgSeeds, false),
     ok = gen_server:stop(mem3_seeds),
     WaitFun = fun() ->
-        case catch mem3_seeds:get_status() of
+        case
+            try
+                mem3_seeds:get_status()
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                exit:Reason -> {'EXIT', Reason}
+            end
+        of
             {ok, #{}} -> ok;
             _ -> wait
         end

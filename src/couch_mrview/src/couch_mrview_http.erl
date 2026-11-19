@@ -180,7 +180,15 @@ all_docs_req(Req, Db, Keys) ->
 all_docs_req(Req, Db, Keys, NS) ->
     case is_restricted(Db, NS) of
         true ->
-            case (catch couch_db:check_is_admin(Db)) of
+            case
+                try
+                    couch_db:check_is_admin(Db)
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                    exit:Reason2 -> {'EXIT', Reason2}
+                end
+            of
                 ok ->
                     do_all_docs_req(Req, Db, Keys, NS);
                 _ when NS == <<"_local">> ->
@@ -253,7 +261,15 @@ set_namespace(NS, #mrargs{extra = Extra} = Args) ->
     Args#mrargs{extra = [{namespace, NS} | Extra]}.
 
 is_admin(Db) ->
-    case catch couch_db:check_is_admin(Db) of
+    case
+        try
+            couch_db:check_is_admin(Db)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {unauthorized, _} ->
             false;
         ok ->
@@ -679,7 +695,15 @@ parse_boolean(Val) ->
 parse_int(Val) when is_integer(Val) ->
     Val;
 parse_int(Val) ->
-    case (catch list_to_integer(Val)) of
+    case
+        try
+            list_to_integer(Val)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         IntVal when is_integer(IntVal) ->
             IntVal;
         _ ->

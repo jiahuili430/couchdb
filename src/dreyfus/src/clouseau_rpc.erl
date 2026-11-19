@@ -328,7 +328,15 @@ connected() ->
                     %  > clouseau_rpc:version().
                     %     {'EXIT',noconnection}
                     %
-                    case (catch version()) of
+                    case
+                        try
+                            version()
+                        catch
+                            throw:Thrown -> Thrown;
+                            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                            exit:Reason -> {'EXIT', Reason}
+                        end
+                    of
                         {ok, _} -> true;
                         _ -> false
                     end;

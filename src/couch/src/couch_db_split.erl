@@ -218,8 +218,16 @@ stop_targets(#{} = Targets) ->
 stop_target_db(Db) ->
     couch_db:close(Db),
     Pid = couch_db:get_pid(Db),
-    catch unlink(Pid),
-    catch exit(Pid, kill),
+    try
+        unlink(Pid)
+    catch
+        _:_ -> ok
+    end,
+    try
+        exit(Pid, kill)
+    catch
+        _:_ -> ok
+    end,
     couch_server:unlock(couch_db:name(Db)),
     ok.
 

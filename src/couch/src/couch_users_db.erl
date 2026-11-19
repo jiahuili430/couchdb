@@ -45,7 +45,15 @@
 before_doc_update(Doc, Db, _UpdateType) ->
     #user_ctx{name = Name} = couch_db:get_user_ctx(Db),
     DocName = get_doc_name(Doc),
-    case (catch couch_db:check_is_admin(Db)) of
+    case
+        try
+            couch_db:check_is_admin(Db)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         ok ->
             save_doc(Doc);
         _ when Name =:= DocName orelse Name =:= null ->
@@ -227,7 +235,15 @@ check_password(Password, RegExp, ErrorMsg) ->
 % Else
 %   -> return doc
 after_doc_read(#doc{id = <<?DESIGN_DOC_PREFIX, _/binary>>} = Doc, Db) ->
-    case (catch couch_db:check_is_admin(Db)) of
+    case
+        try
+            couch_db:check_is_admin(Db)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         ok ->
             Doc;
         _ ->
@@ -238,7 +254,15 @@ after_doc_read(#doc{id = <<?DESIGN_DOC_PREFIX, _/binary>>} = Doc, Db) ->
 after_doc_read(Doc, Db) ->
     #user_ctx{name = Name} = couch_db:get_user_ctx(Db),
     DocName = get_doc_name(Doc),
-    case (catch couch_db:check_is_admin(Db)) of
+    case
+        try
+            couch_db:check_is_admin(Db)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         ok ->
             Doc;
         _ when Name =:= DocName ->

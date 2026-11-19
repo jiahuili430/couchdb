@@ -383,7 +383,15 @@ get_field(Props, Field, Validator) when is_binary(Field) ->
 get_field(Props, [], no_validation) ->
     Props;
 get_field(Props, [], Validator) ->
-    case (catch Validator(Props)) of
+    case
+        try
+            Validator(Props)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         true ->
             Props;
         _ ->

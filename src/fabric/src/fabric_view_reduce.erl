@@ -116,7 +116,12 @@ go2(DbName, DDocId, VName, Workers, {red, {_, Lang, View}, _} = VInfo, Args, Cal
     after
         if
             OsProc == nil -> ok;
-            true -> catch couch_query_servers:ret_os_process(OsProc)
+            true ->
+                try
+                    couch_query_servers:ret_os_process(OsProc)
+                catch
+                    _:_ -> ok
+                end
         end
     end.
 

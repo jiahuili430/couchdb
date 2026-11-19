@@ -116,7 +116,17 @@ check_format() ->
     ?assertEqual("time_stamp", TS),
     ?assertEqual("couchdb", AppId),
     ?assertEqual("msg_id", MsgId),
-    ?assert(is_pid(catch list_to_pid(Pid))),
+    ?assert(
+        is_pid(
+            try
+                list_to_pid(Pid)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                exit:Reason -> {'EXIT', Reason}
+            end
+        )
+    ),
     ?assertEqual("[report123-DB@12345 foo=1]\n", string:join(Rest, " ")),
     ?assert(meck:called(gen_udp, close, 1)),
     ?assert(meck:validate(gen_udp)).

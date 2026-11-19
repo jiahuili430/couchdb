@@ -657,7 +657,11 @@ with_ddoc_proc(Db, #doc{id = DDocId, revs = {Start, [DiskRev | _]}} = DDoc, Fun)
             Resp
     catch
         Tag:Err:Stack ->
-            catch proc_stop(Proc),
+            try
+                proc_stop(Proc)
+            catch
+                _:_ -> ok
+            end,
             erlang:raise(Tag, Err, Stack)
     end.
 
@@ -777,12 +781,24 @@ get_ddoc_process(#doc{} = DDoc, DbKey, DDocKey) ->
     case couch_proc_manager:get_proc(DDoc, DbKey, DDocKey) of
         {ok, Proc, {QueryConfig}} ->
             % process knows the ddoc
-            case (catch proc_prompt(Proc, [<<"reset">>, {QueryConfig}])) of
+            case
+                try
+                    proc_prompt(Proc, [<<"reset">>, {QueryConfig}])
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason2:Stack2 -> {'EXIT', {Reason2, Stack2}};
+                    exit:Reason2 -> {'EXIT', Reason2}
+                end
+            of
                 true ->
                     proc_set_timeout(Proc, couch_util:get_value(<<"timeout">>, QueryConfig)),
                     Proc;
                 _ ->
-                    catch proc_stop(Proc),
+                    try
+                        proc_stop(Proc)
+                    catch
+                        _:_ -> ok
+                    end,
                     get_ddoc_process(DDoc, DbKey, DDocKey)
             end;
         Error ->
@@ -792,12 +808,24 @@ get_ddoc_process(#doc{} = DDoc, DbKey, DDocKey) ->
 get_os_process(Lang) ->
     case couch_proc_manager:get_proc(Lang) of
         {ok, Proc, {QueryConfig}} ->
-            case (catch proc_prompt(Proc, [<<"reset">>, {QueryConfig}])) of
+            case
+                try
+                    proc_prompt(Proc, [<<"reset">>, {QueryConfig}])
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason2:Stack2 -> {'EXIT', {Reason2, Stack2}};
+                    exit:Reason2 -> {'EXIT', Reason2}
+                end
+            of
                 true ->
                     proc_set_timeout(Proc, couch_util:get_value(<<"timeout">>, QueryConfig)),
                     Proc;
                 _ ->
-                    catch proc_stop(Proc),
+                    try
+                        proc_stop(Proc)
+                    catch
+                        _:_ -> ok
+                    end,
                     get_os_process(Lang)
             end;
         Error ->
@@ -806,7 +834,11 @@ get_os_process(Lang) ->
 
 ret_os_process(Proc) ->
     true = couch_proc_manager:ret_proc(Proc),
-    catch unlink(Proc#proc.pid),
+    try
+        unlink(Proc#proc.pid)
+    catch
+        _:_ -> ok
+    end,
     ok.
 
 throw_sum_error(Else) ->

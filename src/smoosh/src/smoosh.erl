@@ -44,7 +44,13 @@ enqueue_all_dbs() ->
 enqueue_all_views() ->
     fold_local_shards(
         fun(#shard{name = Name}, _Acc) ->
-            catch enqueue_views(Name)
+            try
+                enqueue_views(Name)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                exit:Reason -> {'EXIT', Reason}
+            end
         end,
         ok
     ).

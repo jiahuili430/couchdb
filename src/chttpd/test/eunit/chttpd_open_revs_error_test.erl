@@ -34,7 +34,11 @@ setup() ->
 
 teardown(Url) ->
     delete_db(Url),
-    (catch meck:unload(fabric)),
+    try
+        meck:unload(fabric)
+    catch
+        _:_ -> ok
+    end,
     ok = config:delete("admins", ?USER, _Persist = false).
 
 create_db(Url) ->

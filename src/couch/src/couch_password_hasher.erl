@@ -151,4 +151,10 @@ worker_loop(Parent) ->
 upgrade_password_hash(Req, _UserName, Password, UserProps0, AuthModule, AuthCtx) ->
     UserProps1 = [{<<"password">>, Password}, {<<"preserve_salt">>, true} | UserProps0],
     NewUserDoc = couch_doc:from_json_obj({UserProps1}),
-    catch AuthModule:update_user_creds(Req, NewUserDoc, AuthCtx).
+    try
+        AuthModule:update_user_creds(Req, NewUserDoc, AuthCtx)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+        exit:Reason -> {'EXIT', Reason}
+    end.

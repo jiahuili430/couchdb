@@ -72,7 +72,15 @@ stop() ->
 
 handle_call({check_request, Req}, _From, State) when is_function(State, 1) ->
     Resp2 =
-        case (catch State(Req)) of
+        case
+            try
+                State(Req)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
+        of
             {ok, Resp} ->
                 {reply, {ok, Resp}, was_ok};
             {raw, Resp} ->

@@ -45,7 +45,11 @@ setup_all() ->
     Ctx.
 
 teardown_all(Ctx) ->
-    catch application:stop(smoosh),
+    try
+        application:stop(smoosh)
+    catch
+        _:_ -> ok
+    end,
     config:delete("query_server_config", "commit_freq", false),
     test_util:stop(Ctx),
     meck:unload().
@@ -65,8 +69,16 @@ setup() ->
     DbName.
 
 teardown(DbName) ->
-    catch flush(),
-    catch application:stop(smoosh),
+    try
+        flush()
+    catch
+        _:_ -> ok
+    end,
+    try
+        application:stop(smoosh)
+    catch
+        _:_ -> ok
+    end,
     fabric:delete_db(DbName),
     meck:reset(smoosh_server),
     meck:reset(smoosh_channel),

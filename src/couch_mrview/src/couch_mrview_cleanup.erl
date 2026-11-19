@@ -66,7 +66,13 @@ cleanup_processes(ShardName, #{} = Sigs) when is_binary(ShardName) ->
                 error ->
                     case couch_index_server:shard_index_pid(ShardName, Sig) of
                         {ok, IndexPid} ->
-                            (catch gen_server:cast(IndexPid, {ddoc_updated, {not_found, deleted}}));
+                            try
+                                gen_server:cast(IndexPid, {ddoc_updated, {not_found, deleted}})
+                            catch
+                                throw:Thrown -> Thrown;
+                                error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                                exit:Reason -> {'EXIT', Reason}
+                            end;
                         not_found ->
                             ok
                     end

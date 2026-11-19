@@ -198,7 +198,13 @@ get_view_index_state(Db, DDoc, ViewName, Args0, RetryCount) ->
             case Args#mrargs.update of
                 lazy ->
                     spawn(fun() ->
-                        catch couch_index:get_state(Pid, UpdateSeq)
+                        try
+                            couch_index:get_state(Pid, UpdateSeq)
+                        catch
+                            throw:Thrown -> Thrown;
+                            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                            exit:Reason2 -> {'EXIT', Reason2}
+                        end
                     end),
                     couch_index:get_state(Pid, 0);
                 false ->

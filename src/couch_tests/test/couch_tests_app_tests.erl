@@ -104,7 +104,13 @@ mock(application) ->
     application.
 
 unmock(application) ->
-    catch meck:unload(application).
+    try
+        meck:unload(application)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+        exit:Reason -> {'EXIT', Reason}
+    end.
 
 history(Module, Function) ->
     Self = self(),

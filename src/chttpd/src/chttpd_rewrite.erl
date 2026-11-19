@@ -367,7 +367,15 @@ format(<<"int">>, Value) when is_integer(Value) ->
 format(<<"int">>, Value) when is_binary(Value) ->
     format(<<"int">>, ?b2l(Value));
 format(<<"int">>, Value) when is_list(Value) ->
-    case (catch list_to_integer(Value)) of
+    case
+        try
+            list_to_integer(Value)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         IntVal when is_integer(IntVal) ->
             IntVal;
         _ ->

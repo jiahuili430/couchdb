@@ -174,7 +174,15 @@ handle_action(_, _) ->
     {error, <<"Invalid Action'">>}.
 
 get_body(Req) ->
-    case catch couch_httpd:json_body_obj(Req) of
+    case
+        try
+            couch_httpd:json_body_obj(Req)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         {Body} ->
             Body;
         Else ->

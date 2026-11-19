@@ -336,7 +336,15 @@ parse_index_param(_Key, _Value) ->
     [].
 
 parse_val(Value) ->
-    case (catch list_to_integer(Value)) of
+    case
+        try
+            list_to_integer(Value)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack2 -> {'EXIT', {Reason2, Stack2}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         IntVal when is_integer(IntVal) ->
             IntVal;
         _ ->

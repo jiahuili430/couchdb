@@ -31,7 +31,11 @@ teardown({TaskStatusPid, TaskUpdaterPid, Ctx}) ->
         timeout_error,
         ?TIMEOUT
     ),
-    catch exit(TaskUpdaterPid, kill),
+    try
+        exit(TaskUpdaterPid, kill)
+    catch
+        _:_ -> ok
+    end,
     test_util:stop(Ctx).
 
 couch_task_status_test_() ->

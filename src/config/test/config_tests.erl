@@ -86,14 +86,22 @@ setup_config_notifier(Subscription) ->
     {Apps, Pid}.
 
 teardown({Apps, Pid}) when is_pid(Pid) ->
-    catch exit(Pid, kill),
+    try
+        exit(Pid, kill)
+    catch
+        _:_ -> ok
+    end,
     teardown(Apps);
 teardown(Apps) when is_list(Apps) ->
     meck:unload(),
     test_util:stop_applications(Apps).
 
 teardown(_, {Apps, Pid}) when is_pid(Pid) ->
-    catch exit(Pid, kill),
+    try
+        exit(Pid, kill)
+    catch
+        _:_ -> ok
+    end,
     teardown(Apps);
 teardown(_, Apps) ->
     teardown(Apps).
@@ -1115,7 +1123,11 @@ stop_sync(Pid, Timeout) when is_pid(Pid) ->
     MRef = monitor(process, Pid),
     try
         begin
-            catch unlink(Pid),
+            try
+                unlink(Pid)
+            catch
+                _:_ -> ok
+            end,
             exit(Pid, kill),
             receive
                 {'DOWN', MRef, _, _, _} ->

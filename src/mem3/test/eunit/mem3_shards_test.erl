@@ -78,7 +78,13 @@ partitioned_shards_recreated_properly(#{dbname := DbName, dbdoc := DbDoc}) ->
         true,
         test_util:wait_value(
             fun() ->
-                catch is_partitioned(Shard)
+                try
+                    is_partitioned(Shard)
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                    exit:Reason -> {'EXIT', Reason}
+                end
             end,
             true
         )

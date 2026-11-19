@@ -327,13 +327,19 @@ split_host_port(HostAsString) ->
         N ->
             HostPart = string:substr(HostAsString, 1, N - 1),
             case
-                (catch list_to_integer(
-                    string:substr(
-                        HostAsString,
-                        N + 1,
-                        length(HostAsString)
+                try
+                    list_to_integer(
+                        string:substr(
+                            HostAsString,
+                            N + 1,
+                            length(HostAsString)
+                        )
                     )
-                ))
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                    exit:Reason -> {'EXIT', Reason}
+                end
             of
                 {'EXIT', _} ->
                     {split_host(HostAsString), '*'};

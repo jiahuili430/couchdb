@@ -288,7 +288,15 @@ cdata_to_chars([I | Cs]) ->
 cdata_to_chars([]) ->
     [];
 cdata_to_chars(B) when is_binary(B) ->
-    case catch unicode:characters_to_list(B) of
+    case
+        try
+            unicode:characters_to_list(B)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         L when is_list(L) -> L;
         _ -> binary_to_list(B)
     end.

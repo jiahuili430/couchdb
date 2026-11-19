@@ -96,7 +96,15 @@ fprint(T, Max, Options) ->
 %%
 -spec safe(term(), pos_integer()) -> {string(), pos_integer()} | {string()}.
 safe(What, Len) ->
-    case catch print(What, Len) of
+    case
+        try
+            print(What, Len)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         {L, Used} when is_list(L) -> {L, Used};
         _ -> {"unable to print" ++ io_lib:write(What, 99)}
     end.

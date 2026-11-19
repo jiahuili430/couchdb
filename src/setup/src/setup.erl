@@ -85,7 +85,15 @@ cluster_system_dbs() ->
 has_cluster_system_dbs([]) ->
     true;
 has_cluster_system_dbs([Db | Dbs]) ->
-    case catch fabric:get_db_info(Db) of
+    case
+        try
+            fabric:get_db_info(Db)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, _} -> has_cluster_system_dbs(Dbs);
         _ -> false
     end.

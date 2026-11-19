@@ -439,7 +439,15 @@ parse_bool_param(Name, Val) ->
 parse_int_param(_, Val) when is_integer(Val) ->
     Val;
 parse_int_param(Name, Val) ->
-    case (catch list_to_integer(Val)) of
+    case
+        try
+            list_to_integer(Val)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         IntVal when is_integer(IntVal) ->
             IntVal;
         _ ->

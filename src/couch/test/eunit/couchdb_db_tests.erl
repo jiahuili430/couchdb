@@ -22,7 +22,11 @@ setup() ->
     DbName.
 
 teardown(DbName) ->
-    (catch fabric:delete_db(DbName)),
+    try
+        fabric:delete_db(DbName)
+    catch
+        _:_ -> ok
+    end,
     ok.
 
 clustered_db_test_() ->

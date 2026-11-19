@@ -239,7 +239,16 @@ hs256_test() ->
     >>,
     KS = fun(<<"HS256">>, <<"123456">>) -> <<"secret">> end,
     Checks = [{iss, <<"https://foo.com">>}, iat, exp, typ, alg, kid],
-    ?assertMatch({ok, _}, catch jwtf:decode(EncodedToken, Checks, KS)).
+    ?assertMatch(
+        {ok, _},
+        try
+            jwtf:decode(EncodedToken, Checks, KS)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    ).
 
 %% pip install PyJWT
 %% > import jwt
@@ -253,7 +262,13 @@ hs384_test() ->
     KS = fun(<<"HS384">>, _) -> <<"secret">> end,
     ?assertMatch(
         {ok, {[{<<"foo">>, <<"bar">>}]}},
-        catch jwtf:decode(EncodedToken, [], KS)
+        try
+            jwtf:decode(EncodedToken, [], KS)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
     ).
 
 %% pip install PyJWT
@@ -268,7 +283,13 @@ hs512_test() ->
     KS = fun(<<"HS512">>, _) -> <<"secret">> end,
     ?assertMatch(
         {ok, {[{<<"foo">>, <<"bar">>}]}},
-        catch jwtf:decode(EncodedToken, [], KS)
+        try
+            jwtf:decode(EncodedToken, [], KS)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
     ).
 
 %% jwt.io generated

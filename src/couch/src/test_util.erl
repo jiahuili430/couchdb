@@ -160,8 +160,19 @@ stop_sync(Pid, Fun, Timeout) when is_function(Fun) and is_pid(Pid) ->
     MRef = monitor(process, Pid),
     try
         begin
-            catch unlink(Pid),
-            Res = (catch Fun()),
+            try
+                unlink(Pid)
+            catch
+                _:_ -> ok
+            end,
+            Res =
+                try
+                    Fun()
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                    exit:Reason2 -> {'EXIT', Reason2}
+                end,
             receive
                 {'DOWN', MRef, _, _, _} ->
                     Res
@@ -269,8 +280,22 @@ with_processes_restart(Names, Fun, Timeout, Delay) ->
         [],
         Names
     ),
-    [catch unlink(Pid) || {_, Pid} <- Processes],
-    Res = (catch Fun()),
+    [
+        try
+            unlink(Pid)
+        catch
+            _:_ -> ok
+        end
+        || {_, Pid} <- Processes
+    ],
+    Res =
+        try
+            Fun()
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end,
     {wait_start(Processes, Timeout, Delay), Res}.
 
 wait_start(Processses, TimeoutInSec, Delay) ->

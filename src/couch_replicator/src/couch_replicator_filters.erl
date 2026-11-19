@@ -109,7 +109,15 @@ view_type(Props, Options) ->
 
 fetch_internal(DDocName, FilterName, Source) ->
     Db =
-        case (catch couch_replicator_api_wrap:db_open(Source)) of
+        case
+            try
+                couch_replicator_api_wrap:db_open(Source)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
+        of
             {ok, Db0} ->
                 Db0;
             DbError ->
@@ -125,9 +133,15 @@ fetch_internal(DDocName, FilterName, Source) ->
     try
         Body =
             case
-                (catch couch_replicator_api_wrap:open_doc(
-                    Db, <<"_design/", DDocName/binary>>, [ejson_body]
-                ))
+                try
+                    couch_replicator_api_wrap:open_doc(
+                        Db, <<"_design/", DDocName/binary>>, [ejson_body]
+                    )
+                catch
+                    throw:Thrown2 -> Thrown2;
+                    error:Reason3:Stack2 -> {'EXIT', {Reason3, Stack2}};
+                    exit:Reason3 -> {'EXIT', Reason3}
+                end
             of
                 {ok, #doc{body = Body0}} ->
                     Body0;

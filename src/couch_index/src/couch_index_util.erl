@@ -33,13 +33,29 @@ index_file(Module, DbName, FileName) ->
 
 load_doc(Db, #doc_info{} = DI, Opts) ->
     Deleted = lists:member(deleted, Opts),
-    case (catch couch_db:open_doc(Db, DI, Opts)) of
+    case
+        try
+            couch_db:open_doc(Db, DI, Opts)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         {ok, #doc{deleted = false} = Doc} -> Doc;
         {ok, #doc{deleted = true} = Doc} when Deleted -> Doc;
         _Else -> null
     end;
 load_doc(Db, {DocId, Rev}, Opts) ->
-    case (catch load_doc(Db, DocId, Rev, Opts)) of
+    case
+        try
+            load_doc(Db, DocId, Rev, Opts)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         #doc{deleted = false} = Doc -> Doc;
         _ -> null
     end.
@@ -48,13 +64,29 @@ load_doc(Db, DocId, Rev, Options) ->
     case Rev of
         % open most recent rev
         nil ->
-            case (catch couch_db:open_doc(Db, DocId, Options)) of
+            case
+                try
+                    couch_db:open_doc(Db, DocId, Options)
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                    exit:Reason -> {'EXIT', Reason}
+                end
+            of
                 {ok, Doc} -> Doc;
                 _Error -> null
             end;
         % open a specific rev (deletions come back as stubs)
         _ ->
-            case (catch couch_db:open_doc_revs(Db, DocId, [Rev], Options)) of
+            case
+                try
+                    couch_db:open_doc_revs(Db, DocId, [Rev], Options)
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+                    exit:Reason -> {'EXIT', Reason}
+                end
+            of
                 {ok, [{ok, Doc}]} -> Doc;
                 {ok, [{{not_found, missing}, Rev}]} -> null;
                 {ok, [_Else]} -> null

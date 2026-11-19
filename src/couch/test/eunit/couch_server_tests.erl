@@ -36,8 +36,18 @@ setup(_) ->
 
 teardown(Db) ->
     FilePath = couch_db:get_filepath(Db),
-    (catch couch_db:close(Db)),
-    (catch file:delete(FilePath)).
+    try
+        couch_db:close(Db)
+    catch
+        _:_ -> ok
+    end,
+    try
+        file:delete(FilePath)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+        exit:Reason -> {'EXIT', Reason}
+    end.
 
 teardown(rename, Db) ->
     config:set("couchdb", "enable_database_recovery", "false", false),

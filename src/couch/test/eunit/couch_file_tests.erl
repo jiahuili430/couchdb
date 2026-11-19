@@ -239,7 +239,13 @@ should_not_read_beyond_eof(_) ->
     ?assertMatch(
         {error, {read_beyond_eof, Filepath, _, _, _, _}}, couch_file:pread_binary(Fd, Pos)
     ),
-    catch file:close(Fd).
+    try
+        file:close(Fd)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 should_not_read_beyond_eof_when_externally_truncated(_) ->
     {ok, Fd} = couch_file:open(?tempfile(), [create, overwrite]),
@@ -256,7 +262,13 @@ should_not_read_beyond_eof_when_externally_truncated(_) ->
     ?assertMatch(
         {error, {read_beyond_eof, Filepath, _, _, _, _}}, couch_file:pread_binary(Fd, Pos)
     ),
-    catch file:close(Fd).
+    try
+        file:close(Fd)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 should_catch_pread_failure(_) ->
     {ok, Fd} = couch_file:open(?tempfile(), [create, overwrite]),
@@ -265,7 +277,13 @@ should_catch_pread_failure(_) ->
     meck:expect(file, pread, 2, {error, einval}),
     unlink(Fd),
     ?assertMatch({error, {pread, Filepath, einval, {0, _}}}, couch_file:pread_terms(Fd, [Pos])),
-    catch file:close(Fd).
+    try
+        file:close(Fd)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 should_truncate(Fd) ->
     {ok, 0, _} = couch_file:append_term(Fd, foo),
@@ -311,7 +329,13 @@ should_open_read_only(Fd) ->
     ?assertMatch({error, _}, couch_file:append_binary(Fd1, <<"bar">>)),
     ?assertMatch({error, _}, couch_file:append_term(Fd1, bar)),
     ?assertMatch({error, _}, couch_file:append_terms(Fd1, [bar, baz])),
-    catch couch_file:close(Fd1).
+    try
+        couch_file:close(Fd1)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 should_apply_overwrite_create_option(Fd) ->
     {_, Path} = couch_file:process_info(Fd),
@@ -412,7 +436,13 @@ should_detect_eof_mismatch(_) ->
     ?assertMatch(
         {error, {eof_mismatch, 4, 0, _}}, couch_file:write_header(Fd, ~"1111")
     ),
-    catch couch_file:close(Fd).
+    try
+        couch_file:close(Fd)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 header_test_() ->
     {
@@ -923,7 +953,13 @@ t_can_detect_block_corruption_with_xxhash({_Ctx, Path}) ->
     {ok, Header} = couch_file:read_header(Fd1),
     ?assertEqual(header, Header),
     ?assertExit({file_corruption, <<"file corruption">>}, couch_file:pread_binary(Fd1, Pos)),
-    catch couch_file:close(Fd1).
+    try
+        couch_file:close(Fd1)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 t_can_detect_block_corruption_with_legacy_checksum({_Ctx, Path}) ->
     disable_xxhash(),
@@ -943,7 +979,13 @@ t_can_detect_block_corruption_with_legacy_checksum({_Ctx, Path}) ->
     {ok, Header} = couch_file:read_header(Fd1),
     ?assertEqual(header, Header),
     ?assertExit({file_corruption, <<"file corruption">>}, couch_file:pread_binary(Fd1, Pos)),
-    catch couch_file:close(Fd1).
+    try
+        couch_file:close(Fd1)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 enable_xxhash() ->
     reset_legacy_checksum_stats(),

@@ -57,7 +57,11 @@ setup() ->
     DbName.
 
 teardown(DbName) ->
-    catch meck:unload(),
+    try
+        meck:unload()
+    catch
+        _:_ -> ok
+    end,
     couch_server:delete(DbName, [?ADMIN_CTX]).
 
 ddoc() ->

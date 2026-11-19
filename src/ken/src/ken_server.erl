@@ -541,7 +541,13 @@ prune_old_entries_test() ->
             ets:new(ken_workers, [named_table, public, {keypos, #job.name}])
         end,
         fun(_) ->
-            catch ets:delete(ken_workers)
+            try
+                ets:delete(ken_workers)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
         end,
         ?_test(begin
             lists:foreach(

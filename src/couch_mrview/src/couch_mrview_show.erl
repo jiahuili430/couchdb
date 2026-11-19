@@ -28,7 +28,15 @@
 % then it sends the response from the query server to the http client.
 
 maybe_open_doc(Db, DocId) ->
-    case catch couch_httpd_db:couch_doc_open(Db, DocId, nil, [conflicts]) of
+    case
+        try
+            couch_httpd_db:couch_doc_open(Db, DocId, nil, [conflicts])
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    of
         #doc{} = Doc -> Doc;
         {not_found, _} -> nil
     end.

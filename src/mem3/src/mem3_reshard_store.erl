@@ -148,7 +148,11 @@ with_shards_db(Fun) ->
             try
                 Fun(Db)
             after
-                catch couch_db:close(Db)
+                try
+                    couch_db:close(Db)
+                catch
+                    _:_ -> ok
+                end
             end;
         Else ->
             throw(Else)

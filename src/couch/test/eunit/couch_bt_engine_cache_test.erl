@@ -43,7 +43,11 @@ setup() ->
 teardown({Ctx, [_ | _] = Pids}) ->
     lists:foreach(
         fun(Pid) ->
-            catch unlink(Pid),
+            try
+                unlink(Pid)
+            catch
+                _:_ -> ok
+            end,
             exit(Pid, kill)
         end,
         Pids

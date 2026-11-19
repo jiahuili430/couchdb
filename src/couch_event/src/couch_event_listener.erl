@@ -81,7 +81,15 @@ cast(Pid, Message) ->
 do_init(Module, Arg, Options) ->
     ok = maybe_name_process(Options),
     ok = register_listeners(Options),
-    case (catch Module:init(Arg)) of
+    case
+        try
+            Module:init(Arg)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, State} ->
             ?MODULE:loop(#st{module = Module, state = State}, infinity);
         {ok, State, Timeout} when is_integer(Timeout), Timeout >= 0 ->
@@ -125,7 +133,15 @@ register_listeners(Options) ->
     ok.
 
 do_event(#st{module = Module, state = State} = St, DbName, Event) ->
-    case (catch Module:handle_event(DbName, Event, State)) of
+    case
+        try
+            Module:handle_event(DbName, Event, State)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, NewState} ->
             ?MODULE:loop(St#st{state = NewState}, infinity);
         {ok, NewState, Timeout} when is_integer(Timeout), Timeout >= 0 ->
@@ -137,7 +153,15 @@ do_event(#st{module = Module, state = State} = St, DbName, Event) ->
     end.
 
 do_cast(#st{module = Module, state = State} = St, Message) ->
-    case (catch Module:handle_cast(Message, State)) of
+    case
+        try
+            Module:handle_cast(Message, State)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, NewState} ->
             ?MODULE:loop(St#st{state = NewState}, infinity);
         {ok, NewState, Timeout} when is_integer(Timeout), Timeout >= 0 ->
@@ -149,7 +173,15 @@ do_cast(#st{module = Module, state = State} = St, Message) ->
     end.
 
 do_info(#st{module = Module, state = State} = St, Message) ->
-    case (catch Module:handle_info(Message, State)) of
+    case
+        try
+            Module:handle_info(Message, State)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, NewState} ->
             ?MODULE:loop(St#st{state = NewState}, infinity);
         {ok, NewState, Timeout} when is_integer(Timeout), Timeout >= 0 ->
@@ -164,8 +196,16 @@ do_terminate(Reason, #st{module = Module, state = State}) ->
     % Order matters. We want to make sure Module:terminate/1
     % is called even if couch_event:unregister/1 hangs
     % indefinitely.
-    catch Module:terminate(Reason, State),
-    catch couch_event:unregister(self()),
+    try
+        Module:terminate(Reason, State)
+    catch
+        _:_ -> ok
+    end,
+    try
+        couch_event:unregister(self())
+    catch
+        _:_ -> ok
+    end,
     Status =
         case Reason of
             normal -> normal;

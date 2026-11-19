@@ -194,9 +194,23 @@ run(State, [<<"reduce">>, Funs, KVs, _Ctx]) ->
         ),
     Keys2 = lists:reverse(Keys),
     Vals2 = lists:reverse(Vals),
-    {State, catch reduce(State, Funs, Keys2, Vals2, false)};
+    {State,
+        try
+            reduce(State, Funs, Keys2, Vals2, false)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end};
 run(State, [<<"rereduce">>, Funs, Vals, _Ctx]) ->
-    {State, catch reduce(State, Funs, null, Vals, true)};
+    {State,
+        try
+            reduce(State, Funs, null, Vals, true)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end};
 run(#evstate{ddocs = DDocs} = State, [<<"ddoc">>, <<"new">>, DDocId, DDoc]) ->
     DDocs2 = store_ddoc(DDocs, DDocId, DDoc),
     {State#evstate{ddocs = DDocs2}, true};
@@ -226,12 +240,34 @@ ddoc(State, {DDoc}, [FunPath, Args]) ->
     ddoc(State, makefun(State, BFun, {DDoc}), FunPath, Args).
 
 ddoc(State, {_, Fun}, [<<"validate_doc_update">>], Args) ->
-    {State, (catch apply(Fun, Args))};
+    {State,
+        try
+            apply(Fun, Args)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end};
 ddoc(State, {_, Fun}, [<<"rewrites">>], Args) ->
-    {State, (catch apply(Fun, Args))};
+    {State,
+        try
+            apply(Fun, Args)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end};
 ddoc(State, {_, Fun}, [<<"filters">> | _], [Docs, Req]) ->
     FilterFunWrapper = fun(Doc) ->
-        case catch Fun(Doc, Req) of
+        case
+            try
+                Fun(Doc, Req)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
+        of
             true -> true;
             false -> false;
             {'EXIT', Error} -> couch_log:error("~p", [Error])
@@ -241,7 +277,15 @@ ddoc(State, {_, Fun}, [<<"filters">> | _], [Docs, Req]) ->
     {State, [true, Resp]};
 ddoc(State, {_, Fun}, [<<"views">> | _], [Docs]) ->
     MapFunWrapper = fun(Doc) ->
-        case catch Fun(Doc) of
+        case
+            try
+                Fun(Doc)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
+        of
             undefined -> true;
             ok -> false;
             false -> false;
@@ -253,7 +297,15 @@ ddoc(State, {_, Fun}, [<<"views">> | _], [Docs]) ->
     {State, [true, Resp]};
 ddoc(State, {_, Fun}, [<<"shows">> | _], Args) ->
     Resp =
-        case (catch apply(Fun, Args)) of
+        case
+            try
+                apply(Fun, Args)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
+        of
             FunResp when is_list(FunResp) ->
                 FunResp;
             {FunResp} ->
@@ -264,7 +316,15 @@ ddoc(State, {_, Fun}, [<<"shows">> | _], Args) ->
     {State, Resp};
 ddoc(State, {_, Fun}, [<<"updates">> | _], Args) ->
     Resp =
-        case (catch apply(Fun, Args)) of
+        case
+            try
+                apply(Fun, Args)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
+        of
             [JsonDoc, JsonResp] ->
                 [<<"up">>, JsonDoc, JsonResp]
         end,
@@ -272,7 +332,14 @@ ddoc(State, {_, Fun}, [<<"updates">> | _], Args) ->
 ddoc(State, {Sig, Fun}, [<<"lists">> | _], Args) ->
     Self = self(),
     SpawnFun = fun() ->
-        LastChunk = (catch apply(Fun, Args)),
+        LastChunk =
+            try
+                apply(Fun, Args)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end,
         case start_list_resp(Self, Sig) of
             started ->
                 receive
@@ -394,7 +461,15 @@ makefun(_State, Source, BindFuns) when is_list(BindFuns) ->
     FunStr = binary_to_list(Source),
     {ok, Tokens, _} = erl_scan:string(FunStr),
     Form =
-        case (catch erl_parse:parse_exprs(Tokens)) of
+        case
+            try
+                erl_parse:parse_exprs(Tokens)
+            catch
+                throw:Thrown -> Thrown;
+                error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                exit:Reason2 -> {'EXIT', Reason2}
+            end
+        of
             {ok, [ParsedForm]} ->
                 ParsedForm;
             {error, {LineNum, _Mod, [Mesg, Params]}} = Error ->
@@ -435,7 +510,15 @@ foldrows(GetRow, ProcRow, Acc) ->
         nil ->
             {ok, Acc};
         Row ->
-            case (catch ProcRow(Row, Acc)) of
+            case
+                try
+                    ProcRow(Row, Acc)
+                catch
+                    throw:Thrown -> Thrown;
+                    error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                    exit:Reason2 -> {'EXIT', Reason2}
+                end
+            of
                 {ok, Acc2} ->
                     foldrows(GetRow, ProcRow, Acc2);
                 {stop, Acc2} ->

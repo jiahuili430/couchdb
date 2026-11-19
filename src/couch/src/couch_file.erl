@@ -690,7 +690,15 @@ fsync(Fd) ->
     Res.
 
 find_header(Fd, Block) ->
-    case (catch load_header(Fd, Block)) of
+    case
+        try
+            load_header(Fd, Block)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, Bin} ->
             {ok, Bin};
         _Error ->
@@ -763,7 +771,15 @@ find_header(Fd, Block, ReadCount) ->
 find_newest_header(_Fd, []) ->
     not_found;
 find_newest_header(Fd, [{Location, Size} | LocationSizes]) ->
-    case (catch load_header(Fd, Location, Size)) of
+    case
+        try
+            load_header(Fd, Location, Size)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+            exit:Reason2 -> {'EXIT', Reason2}
+        end
+    of
         {ok, HeaderBin} ->
             {ok, Location, HeaderBin};
         _Error ->

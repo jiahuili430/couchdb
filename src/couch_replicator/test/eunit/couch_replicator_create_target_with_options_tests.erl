@@ -88,7 +88,15 @@ should_not_create_target_with_q_any({_Ctx, {Source, Target}}) ->
     create_doc(Source),
     delete_db(Target),
     {error, _} = couch_replicator:replicate(RepObject, ?ADMIN_USER),
-    DbExist = is_list(catch mem3:shards(Target)),
+    DbExist = is_list(
+        try
+            mem3:shards(Target)
+        catch
+            throw:Thrown -> Thrown;
+            error:Reason:Stack -> {'EXIT', {Reason, Stack}};
+            exit:Reason -> {'EXIT', Reason}
+        end
+    ),
     ?assertEqual(false, DbExist).
 
 create_doc(DbName) ->

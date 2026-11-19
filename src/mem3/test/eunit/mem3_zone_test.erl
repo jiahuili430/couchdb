@@ -65,7 +65,11 @@ setup() ->
     test_util:start_couch([rexi]).
 
 teardown(Ctx) ->
-    catch application:stop(mem3),
+    try
+        application:stop(mem3)
+    catch
+        _:_ -> ok
+    end,
     os:unsetenv("COUCHDB_ZONE"),
     Filename = config:get("mem3", "nodes_db", "_nodes") ++ ".couch",
     file:delete(filename:join([?BUILDDIR(), "data", Filename])),

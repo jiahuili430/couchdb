@@ -189,7 +189,13 @@ shutdown(State) ->
 
 delete(#mrst{db_name = DbName, sig = Sig} = State) ->
     couch_file:close(State#mrst.fd),
-    catch couch_mrview_util:delete_files(DbName, Sig).
+    try
+        couch_mrview_util:delete_files(DbName, Sig)
+    catch
+        throw:Thrown -> Thrown;
+        error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+        exit:Reason2 -> {'EXIT', Reason2}
+    end.
 
 reset(State) ->
     couch_util:with_db(State#mrst.db_name, fun(Db) ->

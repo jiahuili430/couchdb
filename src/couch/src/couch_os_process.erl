@@ -69,10 +69,18 @@ readline(#os_proc{port = Port} = OsProc, Acc) ->
         {Port, {data, {eol, Data}}} ->
             lists:reverse(Acc, Data);
         {Port, Err} ->
-            catch port_close(Port),
+            try
+                port_close(Port)
+            catch
+                _:_ -> ok
+            end,
             throw({os_process_error, Err})
     after OsProc#os_proc.timeout ->
-        catch port_close(Port),
+        try
+            port_close(Port)
+        catch
+            _:_ -> ok
+        end,
         log(OsProc, "OS Process ~p Timed out :: ~p msec", [Port, OsProc#os_proc.timeout]),
         throw({os_process_error, "OS process timed out."})
     end.
@@ -158,7 +166,11 @@ init([Command]) ->
     {ok, OsProc, IdleLimit}.
 
 terminate(Reason, #os_proc{port = Port} = OsProc) ->
-    catch port_close(Port),
+    try
+        port_close(Port)
+    catch
+        _:_ -> ok
+    end,
     log(OsProc, "OS Process ~p Terminated :: ~p", [Port, Reason]),
     ok.
 

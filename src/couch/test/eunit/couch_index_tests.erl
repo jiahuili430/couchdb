@@ -246,7 +246,11 @@ tracer_new() ->
 
 tracer_delete() ->
     dbg:stop(),
-    (catch ets:delete(?MODULE)),
+    try
+        ets:delete(?MODULE)
+    catch
+        _:_ -> ok
+    end,
     ok.
 
 tracer_record(Pid) ->

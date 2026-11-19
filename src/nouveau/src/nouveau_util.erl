@@ -79,7 +79,15 @@ design_doc_to_indexes(DbName, #doc{body = {Fields}} = Doc) ->
             {IndexNames, _} = lists:unzip(IndexList),
             lists:flatmap(
                 fun(IndexName) ->
-                    case (catch design_doc_to_index(DbName, Doc, IndexName)) of
+                    case
+                        try
+                            design_doc_to_index(DbName, Doc, IndexName)
+                        catch
+                            throw:Thrown -> Thrown;
+                            error:Reason2:Stack -> {'EXIT', {Reason2, Stack}};
+                            exit:Reason2 -> {'EXIT', Reason2}
+                        end
+                    of
                         {ok, #index{} = Index} -> [Index];
                         _ -> []
                     end

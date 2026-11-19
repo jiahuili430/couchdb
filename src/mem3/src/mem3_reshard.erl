@@ -214,8 +214,16 @@ init(_) ->
 
 terminate(Reason, State) ->
     couch_log:notice("~p terminate ~p ~p", [?MODULE, Reason, statefmt(State)]),
-    catch unlink(State#state.db_monitor),
-    catch exit(State#state.db_monitor, kill),
+    try
+        unlink(State#state.db_monitor)
+    catch
+        _:_ -> ok
+    end,
+    try
+        exit(State#state.db_monitor, kill)
+    catch
+        _:_ -> ok
+    end,
     lists:foreach(fun(Job) -> kill_job_int(Job) end, running_jobs()).
 
 handle_call(start, _From, #state{state = stopped} = State) ->
